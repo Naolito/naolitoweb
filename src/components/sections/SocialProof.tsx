@@ -27,27 +27,12 @@ const SocialProof = () => {
                 </span>
               </h2>
               <p className="mt-6 text-lg text-slate-600 max-w-xl">
-                We design animation that earns attention, sparks conversation, and turns brands into cultural moments.
+                We go far beyond creativity. We study trend curves across platforms, test ideas with our own massive
+                audience, and use that signal to sharpen every story beat. That feedback loop lets us experiment fast,
+                validate what resonates, and then scale with the latest production tech, so each campaign lands with
+                maximum reach, engagement, and cultural impact.
               </p>
 
-              <div className="mt-10 grid grid-cols-2 gap-4">
-                <div className="glass-panel glass-panel-hover p-6">
-                  <div className="text-3xl font-display font-semibold text-slate-900">2.8M</div>
-                  <div className="text-xs uppercase tracking-[0.3em] text-slate-500 mt-2">Total Followers</div>
-                </div>
-                <div className="glass-panel glass-panel-hover p-6">
-                  <div className="text-3xl font-display font-semibold text-slate-900">50M</div>
-                  <div className="text-xs uppercase tracking-[0.3em] text-slate-500 mt-2">Monthly Views</div>
-                </div>
-                <div className="glass-panel glass-panel-hover p-6">
-                  <div className="text-3xl font-display font-semibold text-slate-900">6.4%</div>
-                  <div className="text-xs uppercase tracking-[0.3em] text-slate-500 mt-2">Avg Engagement</div>
-                </div>
-                <div className="glass-panel glass-panel-hover p-6">
-                  <div className="text-3xl font-display font-semibold text-slate-900">150+</div>
-                  <div className="text-xs uppercase tracking-[0.3em] text-slate-500 mt-2">Countries Reached</div>
-                </div>
-              </div>
             </div>
           </Reveal>
 
@@ -127,23 +112,11 @@ const SocialProof = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-black/10 bg-white p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs uppercase tracking-[0.35em] text-slate-500">Retention Score</div>
-                  <div className="mt-2 text-2xl font-display font-semibold text-slate-900">78%</div>
-                </div>
-                <div className="text-[11px] uppercase tracking-[0.3em] text-slate-500">+32% YoY</div>
-              </div>
-              <div className="mt-4 h-2 rounded-full bg-slate-100 overflow-hidden">
-                <div className="h-full w-[78%] bg-gradient-to-r from-primary-400 via-accent-400 to-primary-400" />
-              </div>
-            </div>
             </div>
           </Reveal>
         </div>
 
-        <div className="mt-12 grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
+        <div className="mt-12">
           <Reveal>
             <div className="group relative overflow-hidden rounded-3xl border border-black/10 bg-white">
               <img
@@ -161,41 +134,6 @@ const SocialProof = () => {
                 <p className="mt-3 text-white/60">
                   Character-first storytelling with a global rollout across 24 territories.
                 </p>
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={140}>
-            <div className="glass-panel glass-panel-hover p-8">
-              <div className="text-xs uppercase tracking-[0.35em] text-slate-500">Impact Highlights</div>
-              <div className="mt-6 space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-9 h-9 rounded-full border border-black/10 bg-white flex items-center justify-center text-xs text-slate-500">
-                    01
-                  </div>
-                  <div>
-                    <div className="text-slate-900 font-semibold">Top 10 trending in 11 markets</div>
-                    <div className="text-slate-500 text-sm">Week-one launch performance</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-9 h-9 rounded-full border border-black/10 bg-white flex items-center justify-center text-xs text-slate-500">
-                    02
-                  </div>
-                  <div>
-                    <div className="text-slate-900 font-semibold">3.2x share rate vs benchmark</div>
-                    <div className="text-slate-500 text-sm">Social-first storytelling</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-9 h-9 rounded-full border border-black/10 bg-white flex items-center justify-center text-xs text-slate-500">
-                    03
-                  </div>
-                  <div>
-                    <div className="text-slate-900 font-semibold">Multi-platform cutdowns in 72h</div>
-                    <div className="text-slate-500 text-sm">Agile production pipeline</div>
-                  </div>
-                </div>
               </div>
             </div>
           </Reveal>

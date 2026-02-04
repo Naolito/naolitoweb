@@ -98,42 +98,41 @@ const StudioOriginals = () => {
         }}
       />
 
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-[1.35fr_0.65fr] gap-10 items-start">
-          <div className="space-y-4">
-            <Reveal>
-              <span className="text-xs font-semibold text-sky-500 uppercase tracking-[0.35em]">
-                Naolito Originals
-              </span>
-            </Reveal>
-            <Reveal delay={160}>
-              <div
-                className={`relative overflow-hidden rounded-3xl border border-black/10 ${
-                  isTall ? 'bg-slate-100' : 'bg-white'
-                } shadow-[0_20px_60px_rgba(15,23,42,0.08)]`}
-              >
-                {active && (
-                  <div className="w-full aspect-video lg:aspect-auto lg:h-[520px]">
-                    <video
-                      key={active.id}
-                      src={active.src}
-                      poster={active.poster}
-                      controls
-                      muted
-                      playsInline
-                      preload="metadata"
-                      className={`w-full h-full ${isTall ? 'object-contain bg-slate-100' : 'object-cover'} rounded-none`}
-                    />
-                  </div>
-                )}
-                <div className="absolute top-4 left-4">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/90 px-3 py-1.5 text-[11px] uppercase tracking-[0.35em] text-sky-600 backdrop-blur">
-                    Now Playing
-                  </span>
+      <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12">
+        <Reveal>
+          <span className="text-xs font-semibold text-sky-500 uppercase tracking-[0.35em]">
+            Naolito Originals
+          </span>
+        </Reveal>
+
+        <div className="mt-6 grid lg:grid-cols-[1.35fr_0.65fr] gap-10 items-start">
+          <Reveal delay={160}>
+            <div
+              className={`relative overflow-hidden rounded-3xl border border-black/10 ${
+                isTall ? 'bg-slate-100' : 'bg-white'
+              } shadow-[0_20px_60px_rgba(15,23,42,0.08)]`}
+            >
+              {active && (
+                <div className="w-full aspect-video">
+                  <video
+                    key={active.id}
+                    src={active.src}
+                    poster={active.poster}
+                    controls
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className={`w-full h-full ${isTall ? 'object-contain bg-slate-100' : 'object-cover'} rounded-none`}
+                  />
                 </div>
+              )}
+              <div className="absolute top-4 left-4">
+                <span className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/90 px-3 py-1.5 text-[11px] uppercase tracking-[0.35em] text-sky-600 backdrop-blur">
+                  Now Playing
+                </span>
               </div>
-            </Reveal>
-          </div>
+            </div>
+          </Reveal>
 
           <Reveal delay={240} className="relative">
             <div className="lg:h-[520px] overflow-y-auto pr-2">
