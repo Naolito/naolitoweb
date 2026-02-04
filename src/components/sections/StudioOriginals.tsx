@@ -318,7 +318,7 @@ const StudioOriginals = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-[11px] uppercase tracking-[0.3em] text-slate-500">
-                        {item.tag} • {item.year}
+                        {item.tag || 'Studio Original'}
                       </div>
                       <div className="text-lg font-semibold text-slate-900 truncate">
                         {item.title}
@@ -327,7 +327,7 @@ const StudioOriginals = () => {
                         {item.description}
                       </div>
                       <div className="mt-2 text-[11px] uppercase tracking-[0.3em] text-slate-500">
-                        {item.duration} • {formatCount(likes[item.id] ?? item.likes)} likes
+                        {formatCount(likes[item.id] ?? item.likes)} likes
                       </div>
                     </div>
                     <button

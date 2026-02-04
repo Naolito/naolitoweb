@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
 import { fetchContent, saveContent } from '../lib/contentApi'
 import {
   requestImageUpload,
@@ -17,6 +17,40 @@ import {
 
 const emptyMediaItem = (): MediaItem => normalizeMediaItem({})
 const emptyLogo = (): ClientLogo => normalizeClientLogo({})
+
+const formatDuration = (value: number) => {
+  if (!Number.isFinite(value) || value <= 0) return ''
+  const total = Math.round(value)
+  const minutes = Math.floor(total / 60)
+  const seconds = total % 60
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+}
+
+const getRatio = (width: number, height: number): Ratio => {
+  if (!width || !height) return 'landscape'
+  const ratio = width / height
+  if (ratio < 0.85) return 'portrait'
+  if (ratio > 1.15) return 'landscape'
+  return 'square'
+}
+
+const readVideoMetadata = (file: File): Promise<{ duration: string; ratio: Ratio }> =>
+  new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+    video.src = url
+    video.onloadedmetadata = () => {
+      const duration = formatDuration(video.duration)
+      const ratio = getRatio(video.videoWidth, video.videoHeight)
+      URL.revokeObjectURL(url)
+      resolve({ duration, ratio })
+    }
+    video.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('No se pudo leer el metadata del video.'))
+    }
+  })
 
 const Admin = () => {
   const [originals, setOriginals] = useState<MediaItem[]>([])
@@ -107,6 +141,7 @@ const Admin = () => {
     try {
       startUploading(uploadKey)
       setProgress(uploadKey, 0)
+      const metadata = await readVideoMetadata(file).catch(() => null)
       const upload = await requestVideoUpload({ size: file.size })
       await uploadVideoWithTus(upload.uploadURL, file, {
         onProgress: (percentage) => setProgress(uploadKey, percentage),
@@ -119,6 +154,8 @@ const Admin = () => {
           ...current,
           videoUrl: upload.playbackUrl,
           posterUrl: current.posterUrl || upload.thumbnailUrl,
+          duration: metadata?.duration ?? current.duration,
+          ratio: metadata?.ratio ?? current.ratio,
         }
         return next
       })
@@ -192,7 +229,6 @@ const Admin = () => {
     )
   }
 
-  const ratioOptions = useMemo(() => ['landscape', 'portrait', 'square'] as Ratio[], [])
 
   if (loading) {
     return (
@@ -246,138 +282,134 @@ const Admin = () => {
           </div>
           {status.originals && <div className="mt-2 text-sm text-slate-500">{status.originals}</div>}
 
-          <div className="mt-6 space-y-6">
+          <div className="mt-6 space-y-3">
             {originals.map((item, index) => (
-              <div key={item.id} className="rounded-2xl border border-slate-200/70 bg-white p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="font-semibold text-slate-900">#{index + 1} {item.title || 'Nuevo original'}</div>
+              <details key={item.id} className="group rounded-2xl border border-slate-200/70 bg-white">
+                <summary className="flex items-center gap-4 px-4 py-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                  <div className="relative w-16 h-12 rounded-xl overflow-hidden border border-black/10 bg-slate-50">
+                    {item.posterUrl ? (
+                      <img src={item.posterUrl} alt={item.title} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-[10px] uppercase tracking-[0.25em] text-slate-400">
+                        Poster
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-900 truncate">
+                      {item.title || `Original ${index + 1}`}
+                    </div>
+                    <div className="text-[11px] uppercase tracking-[0.3em] text-slate-500 truncate">
+                      {item.tag || 'Sin tag'}
+                    </div>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-3 text-xs text-slate-400">
+                    <span>{item.videoUrl ? 'Video listo' : 'Sin video'}</span>
+                    <span>{item.posterUrl ? 'Poster ok' : 'Sin poster'}</span>
+                  </div>
                   <button
-                    onClick={() => setOriginals((prev) => prev.filter((entry) => entry.id !== item.id))}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      setOriginals((prev) => prev.filter((entry) => entry.id !== item.id))
+                    }}
                     className="text-xs uppercase tracking-[0.2em] text-rose-500"
                   >
                     Eliminar
                   </button>
-                </div>
+                </summary>
 
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <label className="text-sm text-slate-600">
-                    Titulo
-                    <input
-                      value={item.title}
-                      onChange={(event) => handleMediaChange(setOriginals, index, 'title', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600">
-                    Tag
-                    <input
-                      value={item.tag}
-                      onChange={(event) => handleMediaChange(setOriginals, index, 'tag', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600 md:col-span-2">
-                    Descripcion
-                    <textarea
-                      value={item.description}
-                      onChange={(event) => handleMediaChange(setOriginals, index, 'description', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                      rows={3}
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600">
-                    Ano
-                    <input
-                      value={item.year}
-                      onChange={(event) => handleMediaChange(setOriginals, index, 'year', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600">
-                    Duracion (mm:ss)
-                    <input
-                      value={item.duration}
-                      onChange={(event) => handleMediaChange(setOriginals, index, 'duration', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600">
-                    Likes
-                    <input
-                      type="number"
-                      value={item.likes}
-                      onChange={(event) => handleMediaChange(setOriginals, index, 'likes', Number(event.target.value))}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600">
-                    Ratio
-                    <select
-                      value={item.ratio}
-                      onChange={(event) => handleMediaChange(setOriginals, index, 'ratio', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    >
-                      {ratioOptions.map((ratio) => (
-                        <option key={ratio} value={ratio}>
-                          {ratio}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-dashed border-slate-200 p-4">
-                    <div className="text-sm font-semibold text-slate-700">Video</div>
-                    <div className="mt-2 text-xs text-slate-500 break-all">{item.videoUrl || 'Sin video'}</div>
-                    <div className="mt-3 flex items-center gap-3">
-                      <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white">
-                        Subir video
-                        <input
-                          type="file"
-                          accept="video/*"
-                          className="hidden"
-                          onChange={(event) => {
-                            const file = event.target.files?.[0]
-                            if (file) {
-                              handleVideoUpload(originals, setOriginals, index, file)
-                            }
-                          }}
-                        />
-                      </label>
-                      {uploading[`${item.id}-video`] && (
-                        <span className="text-xs text-slate-500">
-                          Subiendo {uploadProgress[`${item.id}-video`] ?? 0}%
-                        </span>
-                      )}
-                    </div>
+                <div className="border-t border-slate-100 px-4 pb-5 pt-4">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <label className="text-sm text-slate-600">
+                      Titulo
+                      <input
+                        value={item.title}
+                        onChange={(event) => handleMediaChange(setOriginals, index, 'title', event.target.value)}
+                        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
+                      />
+                    </label>
+                    <label className="text-sm text-slate-600">
+                      Tag
+                      <input
+                        value={item.tag}
+                        onChange={(event) => handleMediaChange(setOriginals, index, 'tag', event.target.value)}
+                        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
+                      />
+                    </label>
+                    <label className="text-sm text-slate-600 md:col-span-2">
+                      Descripcion
+                      <textarea
+                        value={item.description}
+                        onChange={(event) => handleMediaChange(setOriginals, index, 'description', event.target.value)}
+                        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
+                        rows={3}
+                      />
+                    </label>
+                    <label className="text-sm text-slate-600">
+                      Likes (opcional)
+                      <input
+                        type="number"
+                        value={item.likes}
+                        onChange={(event) => handleMediaChange(setOriginals, index, 'likes', Number(event.target.value))}
+                        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
+                      />
+                    </label>
                   </div>
 
-                  <div className="rounded-2xl border border-dashed border-slate-200 p-4">
-                    <div className="text-sm font-semibold text-slate-700">Poster</div>
-                    <div className="mt-2 text-xs text-slate-500 break-all">{item.posterUrl || 'Sin poster'}</div>
-                    <div className="mt-3 flex items-center gap-3">
-                      <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
-                        Subir imagen
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(event) => {
-                            const file = event.target.files?.[0]
-                            if (file) {
-                              handlePosterUpload(originals, setOriginals, index, file)
-                            }
-                          }}
-                        />
-                      </label>
-                      {uploading[`${item.id}-poster`] && (
-                        <span className="text-xs text-slate-500">Subiendo...</span>
-                      )}
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    <div className="rounded-2xl border border-dashed border-slate-200 p-4">
+                      <div className="text-sm font-semibold text-slate-700">Video</div>
+                      <div className="mt-2 text-xs text-slate-500 break-all">{item.videoUrl || 'Sin video'}</div>
+                      <div className="mt-3 flex items-center gap-3">
+                        <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white">
+                          Subir video
+                          <input
+                            type="file"
+                            accept="video/*"
+                            className="hidden"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0]
+                              if (file) {
+                                handleVideoUpload(originals, setOriginals, index, file)
+                              }
+                            }}
+                          />
+                        </label>
+                        {uploading[`${item.id}-video`] && (
+                          <span className="text-xs text-slate-500">
+                            Subiendo {uploadProgress[`${item.id}-video`] ?? 0}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-dashed border-slate-200 p-4">
+                      <div className="text-sm font-semibold text-slate-700">Poster</div>
+                      <div className="mt-2 text-xs text-slate-500 break-all">{item.posterUrl || 'Sin poster'}</div>
+                      <div className="mt-3 flex items-center gap-3">
+                        <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
+                          Subir imagen
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0]
+                              if (file) {
+                                handlePosterUpload(originals, setOriginals, index, file)
+                              }
+                            }}
+                          />
+                        </label>
+                        {uploading[`${item.id}-poster`] && (
+                          <span className="text-xs text-slate-500">Subiendo...</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </details>
             ))}
           </div>
         </section>
@@ -405,138 +437,134 @@ const Admin = () => {
           </div>
           {status['client-projects'] && <div className="mt-2 text-sm text-slate-500">{status['client-projects']}</div>}
 
-          <div className="mt-6 space-y-6">
+          <div className="mt-6 space-y-3">
             {clientProjects.map((item, index) => (
-              <div key={item.id} className="rounded-2xl border border-slate-200/70 bg-white p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="font-semibold text-slate-900">#{index + 1} {item.title || 'Nuevo proyecto'}</div>
+              <details key={item.id} className="group rounded-2xl border border-slate-200/70 bg-white">
+                <summary className="flex items-center gap-4 px-4 py-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                  <div className="relative w-16 h-12 rounded-xl overflow-hidden border border-black/10 bg-slate-50">
+                    {item.posterUrl ? (
+                      <img src={item.posterUrl} alt={item.title} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-[10px] uppercase tracking-[0.25em] text-slate-400">
+                        Poster
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-900 truncate">
+                      {item.title || `Proyecto ${index + 1}`}
+                    </div>
+                    <div className="text-[11px] uppercase tracking-[0.3em] text-slate-500 truncate">
+                      {item.tag || 'Sin tag'}
+                    </div>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-3 text-xs text-slate-400">
+                    <span>{item.videoUrl ? 'Video listo' : 'Sin video'}</span>
+                    <span>{item.posterUrl ? 'Poster ok' : 'Sin poster'}</span>
+                  </div>
                   <button
-                    onClick={() => setClientProjects((prev) => prev.filter((entry) => entry.id !== item.id))}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      setClientProjects((prev) => prev.filter((entry) => entry.id !== item.id))
+                    }}
                     className="text-xs uppercase tracking-[0.2em] text-rose-500"
                   >
                     Eliminar
                   </button>
-                </div>
+                </summary>
 
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <label className="text-sm text-slate-600">
-                    Titulo
-                    <input
-                      value={item.title}
-                      onChange={(event) => handleMediaChange(setClientProjects, index, 'title', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600">
-                    Tag
-                    <input
-                      value={item.tag}
-                      onChange={(event) => handleMediaChange(setClientProjects, index, 'tag', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600 md:col-span-2">
-                    Descripcion
-                    <textarea
-                      value={item.description}
-                      onChange={(event) => handleMediaChange(setClientProjects, index, 'description', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                      rows={3}
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600">
-                    Ano
-                    <input
-                      value={item.year}
-                      onChange={(event) => handleMediaChange(setClientProjects, index, 'year', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600">
-                    Duracion (mm:ss)
-                    <input
-                      value={item.duration}
-                      onChange={(event) => handleMediaChange(setClientProjects, index, 'duration', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600">
-                    Likes
-                    <input
-                      type="number"
-                      value={item.likes}
-                      onChange={(event) => handleMediaChange(setClientProjects, index, 'likes', Number(event.target.value))}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    />
-                  </label>
-                  <label className="text-sm text-slate-600">
-                    Ratio
-                    <select
-                      value={item.ratio}
-                      onChange={(event) => handleMediaChange(setClientProjects, index, 'ratio', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    >
-                      {ratioOptions.map((ratio) => (
-                        <option key={ratio} value={ratio}>
-                          {ratio}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-dashed border-slate-200 p-4">
-                    <div className="text-sm font-semibold text-slate-700">Video</div>
-                    <div className="mt-2 text-xs text-slate-500 break-all">{item.videoUrl || 'Sin video'}</div>
-                    <div className="mt-3 flex items-center gap-3">
-                      <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white">
-                        Subir video
-                        <input
-                          type="file"
-                          accept="video/*"
-                          className="hidden"
-                          onChange={(event) => {
-                            const file = event.target.files?.[0]
-                            if (file) {
-                              handleVideoUpload(clientProjects, setClientProjects, index, file)
-                            }
-                          }}
-                        />
-                      </label>
-                      {uploading[`${item.id}-video`] && (
-                        <span className="text-xs text-slate-500">
-                          Subiendo {uploadProgress[`${item.id}-video`] ?? 0}%
-                        </span>
-                      )}
-                    </div>
+                <div className="border-t border-slate-100 px-4 pb-5 pt-4">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <label className="text-sm text-slate-600">
+                      Titulo
+                      <input
+                        value={item.title}
+                        onChange={(event) => handleMediaChange(setClientProjects, index, 'title', event.target.value)}
+                        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
+                      />
+                    </label>
+                    <label className="text-sm text-slate-600">
+                      Tag
+                      <input
+                        value={item.tag}
+                        onChange={(event) => handleMediaChange(setClientProjects, index, 'tag', event.target.value)}
+                        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
+                      />
+                    </label>
+                    <label className="text-sm text-slate-600 md:col-span-2">
+                      Descripcion
+                      <textarea
+                        value={item.description}
+                        onChange={(event) => handleMediaChange(setClientProjects, index, 'description', event.target.value)}
+                        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
+                        rows={3}
+                      />
+                    </label>
+                    <label className="text-sm text-slate-600">
+                      Likes (opcional)
+                      <input
+                        type="number"
+                        value={item.likes}
+                        onChange={(event) => handleMediaChange(setClientProjects, index, 'likes', Number(event.target.value))}
+                        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
+                      />
+                    </label>
                   </div>
 
-                  <div className="rounded-2xl border border-dashed border-slate-200 p-4">
-                    <div className="text-sm font-semibold text-slate-700">Poster</div>
-                    <div className="mt-2 text-xs text-slate-500 break-all">{item.posterUrl || 'Sin poster'}</div>
-                    <div className="mt-3 flex items-center gap-3">
-                      <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
-                        Subir imagen
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(event) => {
-                            const file = event.target.files?.[0]
-                            if (file) {
-                              handlePosterUpload(clientProjects, setClientProjects, index, file)
-                            }
-                          }}
-                        />
-                      </label>
-                      {uploading[`${item.id}-poster`] && (
-                        <span className="text-xs text-slate-500">Subiendo...</span>
-                      )}
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    <div className="rounded-2xl border border-dashed border-slate-200 p-4">
+                      <div className="text-sm font-semibold text-slate-700">Video</div>
+                      <div className="mt-2 text-xs text-slate-500 break-all">{item.videoUrl || 'Sin video'}</div>
+                      <div className="mt-3 flex items-center gap-3">
+                        <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white">
+                          Subir video
+                          <input
+                            type="file"
+                            accept="video/*"
+                            className="hidden"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0]
+                              if (file) {
+                                handleVideoUpload(clientProjects, setClientProjects, index, file)
+                              }
+                            }}
+                          />
+                        </label>
+                        {uploading[`${item.id}-video`] && (
+                          <span className="text-xs text-slate-500">
+                            Subiendo {uploadProgress[`${item.id}-video`] ?? 0}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-dashed border-slate-200 p-4">
+                      <div className="text-sm font-semibold text-slate-700">Poster</div>
+                      <div className="mt-2 text-xs text-slate-500 break-all">{item.posterUrl || 'Sin poster'}</div>
+                      <div className="mt-3 flex items-center gap-3">
+                        <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
+                          Subir imagen
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0]
+                              if (file) {
+                                handlePosterUpload(clientProjects, setClientProjects, index, file)
+                              }
+                            }}
+                          />
+                        </label>
+                        {uploading[`${item.id}-poster`] && (
+                          <span className="text-xs text-slate-500">Subiendo...</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </details>
             ))}
           </div>
         </section>
@@ -564,40 +592,41 @@ const Admin = () => {
           </div>
           {status['client-logos'] && <div className="mt-2 text-sm text-slate-500">{status['client-logos']}</div>}
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 space-y-3">
             {clientLogos.map((item, index) => (
-              <div key={item.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200/70 bg-white p-4">
+              <div key={item.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200/70 bg-white p-3">
+                <div className="h-12 w-16 overflow-hidden rounded-xl border border-black/10 bg-slate-50">
+                  {item.logoUrl ? (
+                    <img src={item.logoUrl} alt={item.name} className="h-full w-full object-contain p-2" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[10px] uppercase tracking-[0.25em] text-slate-400">
+                      Logo
+                    </div>
+                  )}
+                </div>
                 <div className="flex-1 min-w-[200px]">
-                  <label className="text-sm text-slate-600">
-                    Nombre
-                    <input
-                      value={item.name}
-                      onChange={(event) => handleLogoChange(index, 'name', event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
-                    />
-                  </label>
+                  <input
+                    value={item.name}
+                    onChange={(event) => handleLogoChange(index, 'name', event.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800"
+                    placeholder="Nombre del cliente"
+                  />
                 </div>
-                <div className="flex-1 min-w-[240px]">
-                  <div className="text-sm text-slate-600">Logo</div>
-                  <div className="mt-1 text-xs text-slate-500 break-all">{item.logoUrl || 'Sin logo'}</div>
-                  <div className="mt-2 flex items-center gap-3">
-                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
-                      Subir imagen
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(event) => {
-                          const file = event.target.files?.[0]
-                          if (file) {
-                            handleLogoUpload(index, file)
-                          }
-                        }}
-                      />
-                    </label>
-                    {uploading[`${item.id}-logo`] && <span className="text-xs text-slate-500">Subiendo...</span>}
-                  </div>
-                </div>
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
+                  Subir logo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0]
+                      if (file) {
+                        handleLogoUpload(index, file)
+                      }
+                    }}
+                  />
+                </label>
+                {uploading[`${item.id}-logo`] && <span className="text-xs text-slate-500">Subiendo...</span>}
                 <button
                   onClick={() => setClientLogos((prev) => prev.filter((entry) => entry.id !== item.id))}
                   className="text-xs uppercase tracking-[0.2em] text-rose-500"
