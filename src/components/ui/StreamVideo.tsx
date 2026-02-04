@@ -23,9 +23,21 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
     if (Hls.isSupported()) {
       const hls = new Hls({
         enableWorker: true,
+        backBufferLength: 0,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
       })
+
+      // Force highest quality once manifest is loaded
+      hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+        const highestLevel = data.levels.length - 1
+        hls.currentLevel = highestLevel // Force HD
+        hls.loadLevel = highestLevel
+      })
+
       hls.loadSource(source)
       hls.attachMedia(video)
+
       return () => {
         hls.destroy()
       }
