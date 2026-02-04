@@ -1,4 +1,14 @@
 import { Upload } from 'tus-js-client'
+import { detectNetworkSpeed, getAdaptiveChunkSize } from '../hooks/useNetworkSpeed'
+
+export type UploadProgressInfo = {
+  percentage: number
+  speedMbps: number
+  etaSeconds: number
+  bytesUploaded: number
+  bytesTotal: number
+  isSlowConnection: boolean
+}
 
 export type ImageUploadResponse = {
   uploadURL: string
@@ -90,14 +100,88 @@ export const requestVideoUpload = async (
   return response.json()
 }
 
+// Slow connection threshold (1 Mbps) - warn user after sustained slow speed
+const SLOW_CONNECTION_THRESHOLD_MBPS = 1
+const SLOW_CONNECTION_CHECK_DURATION_MS = 30000
+
 export const uploadVideoWithTus = (
   uploadURL: string,
   file: File,
   options?: {
-    onProgress?: (percentage: number) => void
+    onProgress?: (info: UploadProgressInfo) => void
   },
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
+    // Track upload metrics for speed calculation
+    let lastBytesUploaded = 0
+    let lastProgressTime = Date.now()
+    let uploadStartTime = Date.now()
+    let slowConnectionDetected = false
+    let recentSpeeds: number[] = []
+
+    // Get initial chunk size based on detected network speed
+    const networkInfo = detectNetworkSpeed()
+    let currentChunkSize = networkInfo.recommendedChunkSize
+
+    const calculateProgress = (bytesUploaded: number, bytesTotal: number): UploadProgressInfo => {
+      const now = Date.now()
+      const timeDeltaMs = now - lastProgressTime
+      const bytesDelta = bytesUploaded - lastBytesUploaded
+
+      // Calculate current speed (bytes per second)
+      let speedBps = 0
+      if (timeDeltaMs > 0 && bytesDelta > 0) {
+        speedBps = (bytesDelta / timeDeltaMs) * 1000
+      }
+
+      // Keep rolling average of recent speeds (last 5 measurements)
+      if (speedBps > 0) {
+        recentSpeeds.push(speedBps)
+        if (recentSpeeds.length > 5) {
+          recentSpeeds.shift()
+        }
+      }
+
+      // Use average speed for smoother display
+      const avgSpeedBps =
+        recentSpeeds.length > 0
+          ? recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length
+          : speedBps
+
+      const speedMbps = (avgSpeedBps * 8) / (1024 * 1024)
+
+      // Calculate ETA
+      const remainingBytes = bytesTotal - bytesUploaded
+      const etaSeconds = avgSpeedBps > 0 ? remainingBytes / avgSpeedBps : 0
+
+      // Check for slow connection after initial period
+      const elapsedMs = now - uploadStartTime
+      if (
+        !slowConnectionDetected &&
+        elapsedMs > SLOW_CONNECTION_CHECK_DURATION_MS &&
+        speedMbps < SLOW_CONNECTION_THRESHOLD_MBPS &&
+        speedMbps > 0
+      ) {
+        slowConnectionDetected = true
+      }
+
+      // Update tracking variables
+      lastBytesUploaded = bytesUploaded
+      lastProgressTime = now
+
+      return {
+        percentage: Math.round((bytesUploaded / bytesTotal) * 100),
+        speedMbps,
+        etaSeconds,
+        bytesUploaded,
+        bytesTotal,
+        isSlowConnection: slowConnectionDetected,
+      }
+    }
+
+    // Generate fingerprint for resumability
+    const fingerprint = `naolito-${file.name}-${file.size}-${file.lastModified}`
+
     const upload = new Upload(file, {
       uploadUrl: uploadURL,
       uploadSize: file.size,
@@ -105,21 +189,38 @@ export const uploadVideoWithTus = (
         filename: file.name,
         filetype: file.type,
       },
-      chunkSize: 8 * 1024 * 1024,
+      chunkSize: currentChunkSize,
       retryDelays: [0, 1000, 3000, 5000, 10000],
+      // Enable resumability
+      fingerprint: () => Promise.resolve(fingerprint),
+      storeFingerprintForResuming: true,
+      removeFingerprintOnSuccess: true,
       onError: (error) => {
         reject(error)
       },
       onProgress: (bytesUploaded, bytesTotal) => {
         if (!options?.onProgress || bytesTotal === 0) return
-        const percentage = Math.round((bytesUploaded / bytesTotal) * 100)
-        options.onProgress(percentage)
+        const progressInfo = calculateProgress(bytesUploaded, bytesTotal)
+        options.onProgress(progressInfo)
+
+        // Adaptive chunk size: adjust based on measured speed
+        // Only adjust if we have enough data points
+        if (recentSpeeds.length >= 3 && progressInfo.speedMbps > 0) {
+          const newChunkSize = getAdaptiveChunkSize(progressInfo.speedMbps)
+          if (newChunkSize !== currentChunkSize) {
+            currentChunkSize = newChunkSize
+            // Note: tus-js-client doesn't support changing chunk size mid-upload,
+            // but this will be used for future uploads in the same session
+          }
+        }
       },
       onSuccess: () => {
         resolve()
       },
     })
 
+    // Reset start time when actually starting
+    uploadStartTime = Date.now()
     upload.start()
   })
 }

@@ -6,7 +6,9 @@ import {
   resolveImageUrl,
   uploadFileToUrl,
   uploadVideoWithTus,
+  type UploadProgressInfo,
 } from '../lib/cloudflareUpload'
+import { formatSpeed, formatEta } from '../hooks/useNetworkSpeed'
 import {
   ClientLogo,
   MediaItem,
@@ -52,6 +54,37 @@ const readVideoMetadata = (file: File): Promise<{ duration: string; ratio: Ratio
     }
   })
 
+const VideoUploadStatus = ({ progress }: { progress: UploadProgressInfo | null }) => {
+  if (!progress) {
+    return <span className="text-xs text-slate-500">Iniciando...</span>
+  }
+
+  const { percentage, speedMbps, etaSeconds, isSlowConnection } = progress
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden min-w-[80px]">
+          <div
+            className="h-full bg-sky-500 rounded-full transition-all duration-300"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+        <span className="text-xs font-medium text-slate-600 tabular-nums">{percentage}%</span>
+      </div>
+      <div className="flex items-center gap-2 text-[10px] text-slate-400">
+        {speedMbps > 0 && <span>{formatSpeed(speedMbps * 1024 * 1024 / 8)}</span>}
+        {etaSeconds > 0 && <span>{formatEta(etaSeconds)}</span>}
+      </div>
+      {isSlowConnection && (
+        <div className="text-[10px] text-amber-600">
+          Conexion lenta detectada
+        </div>
+      )}
+    </div>
+  )
+}
+
 const Admin = () => {
   const [originals, setOriginals] = useState<MediaItem[]>([])
   const [clientProjects, setClientProjects] = useState<MediaItem[]>([])
@@ -59,7 +92,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState<Record<string, string>>({})
   const [uploading, setUploading] = useState<Record<string, boolean>>({})
-  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
+  const [uploadProgress, setUploadProgress] = useState<Record<string, UploadProgressInfo | null>>({})
 
   const setSectionStatus = (key: string, message: string) => {
     setStatus((prev) => ({ ...prev, [key]: message }))
@@ -124,7 +157,7 @@ const Admin = () => {
 
   const startUploading = (key: string) => setUploading((prev) => ({ ...prev, [key]: true }))
   const stopUploading = (key: string) => setUploading((prev) => ({ ...prev, [key]: false }))
-  const setProgress = (key: string, value: number) => {
+  const setProgress = (key: string, value: UploadProgressInfo | null) => {
     setUploadProgress((prev) => ({ ...prev, [key]: value }))
   }
 
@@ -140,11 +173,11 @@ const Admin = () => {
 
     try {
       startUploading(uploadKey)
-      setProgress(uploadKey, 0)
+      setProgress(uploadKey, null)
       const metadata = await readVideoMetadata(file).catch(() => null)
       const upload = await requestVideoUpload({ size: file.size })
       await uploadVideoWithTus(upload.uploadURL, file, {
-        onProgress: (percentage) => setProgress(uploadKey, percentage),
+        onProgress: (info) => setProgress(uploadKey, info),
       })
 
       setter((prev) => {
@@ -164,7 +197,7 @@ const Admin = () => {
       setSectionStatus('upload', message)
     } finally {
       stopUploading(uploadKey)
-      setProgress(uploadKey, 0)
+      setProgress(uploadKey, null)
     }
   }
 
@@ -377,9 +410,7 @@ const Admin = () => {
                           />
                         </label>
                         {uploading[`${item.id}-video`] && (
-                          <span className="text-xs text-slate-500">
-                            Subiendo {uploadProgress[`${item.id}-video`] ?? 0}%
-                          </span>
+                          <VideoUploadStatus progress={uploadProgress[`${item.id}-video`]} />
                         )}
                       </div>
                     </div>
@@ -532,9 +563,7 @@ const Admin = () => {
                           />
                         </label>
                         {uploading[`${item.id}-video`] && (
-                          <span className="text-xs text-slate-500">
-                            Subiendo {uploadProgress[`${item.id}-video`] ?? 0}%
-                          </span>
+                          <VideoUploadStatus progress={uploadProgress[`${item.id}-video`]} />
                         )}
                       </div>
                     </div>

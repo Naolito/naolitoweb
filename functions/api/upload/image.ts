@@ -30,18 +30,20 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     payload = {}
   }
 
+  const formData = new FormData()
+  formData.append('requireSignedURLs', 'false')
+  if (payload?.metadata && Object.keys(payload.metadata).length > 0) {
+    formData.append('metadata', JSON.stringify(payload.metadata))
+  }
+
   const response = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/images/v2/direct_upload`,
     {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
-        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        requireSignedURLs: false,
-        metadata: payload?.metadata ?? {},
-      }),
+      body: formData,
     },
   )
 
