@@ -146,7 +146,8 @@ const Admin = () => {
       }
       onSuccess(url)
     } catch (error) {
-      setSectionStatus('upload', 'No se pudo subir la imagen. Reintenta.')
+      const message = error instanceof Error ? error.message : 'No se pudo subir la imagen. Reintenta.'
+      setSectionStatus('upload', message)
     } finally {
       stopUploading(uploadKey)
     }

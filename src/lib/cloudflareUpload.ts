@@ -40,6 +40,19 @@ const getImageVariant = () => {
   return (import.meta.env.VITE_CLOUDFLARE_IMAGES_VARIANT as string | undefined) ?? 'public'
 }
 
+const parseApiError = async (response: Response, fallback: string) => {
+  try {
+    const data = await response.json()
+    const details =
+      data?.error?.message ||
+      data?.message ||
+      (Array.isArray(data?.errors) && data.errors.length > 0 ? data.errors[0]?.message : null)
+    return details ? `${fallback} (${details})` : fallback
+  } catch (error) {
+    return fallback
+  }
+}
+
 export const requestImageUpload = async (): Promise<ImageUploadResponse> => {
   const response = await fetch('/api/upload/image', {
     method: 'POST',
@@ -48,7 +61,8 @@ export const requestImageUpload = async (): Promise<ImageUploadResponse> => {
   })
 
   if (!response.ok) {
-    throw new Error('No se pudo iniciar la subida de imagen.')
+    const message = await parseApiError(response, 'No se pudo iniciar la subida de imagen.')
+    throw new Error(message)
   }
 
   return response.json()
@@ -64,7 +78,8 @@ export const requestVideoUpload = async (
   })
 
   if (!response.ok) {
-    throw new Error('No se pudo iniciar la subida de video.')
+    const message = await parseApiError(response, 'No se pudo iniciar la subida de video.')
+    throw new Error(message)
   }
 
   return response.json()
