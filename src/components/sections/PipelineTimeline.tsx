@@ -51,7 +51,7 @@ const PipelineTimeline = () => {
                   style={{ top: '10px' }}
                 />
                 <div className="flex md:grid md:grid-cols-12 gap-6 md:gap-0 pr-10 md:pr-0">
-                  {steps.map((step, index) => (
+                  {steps.map((step) => (
                     <div
                       key={step.title}
                       className="min-w-[24%] md:min-w-0 md:col-span-1 snap-center flex flex-col items-center text-center px-1"

@@ -1,12 +1,9 @@
 import { Link } from 'react-router-dom'
-import { useStore } from '../../store/store'
 import Button from '../ui/Button'
 import Reveal from '../ui/Reveal'
 import heroBanner from '../../../media/hero-banner.png'
 
 const Hero = () => {
-  const studioInfo = useStore((state) => state.studioInfo)
-
   return (
     <section className="relative py-12 overflow-hidden bg-[#f8fbff]">
       {/* Background */}

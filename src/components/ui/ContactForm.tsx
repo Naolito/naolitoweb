@@ -131,7 +131,7 @@ const ContactForm = () => {
       />
 
         {submitSuccess && (
-          <div className="p-4 bg-green-100 dark:bg-green-500/20 border border-green-500 rounded-lg text-green-800 dark:text-green-400">
+          <div className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm">
             Thank you for your message! We'll get back to you soon.
           </div>
         )}
@@ -150,4 +150,3 @@ const ContactForm = () => {
 }
 
 export default ContactForm
-

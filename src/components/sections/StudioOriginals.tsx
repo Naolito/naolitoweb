@@ -125,6 +125,7 @@ const formatCount = (value: number) => {
 
 const StudioOriginals = () => {
   const [activeId, setActiveId] = useState(originals[0]?.id ?? '')
+  const [hasInteracted, setHasInteracted] = useState(false)
   const [likes, setLikes] = useState<Record<string, number>>(() => (
     Object.fromEntries(originals.map((item) => [item.id, item.likes])) as Record<string, number>
   ))
@@ -138,6 +139,7 @@ const StudioOriginals = () => {
   const isTall = active?.ratio !== 'landscape'
 
   const videoContainerRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const [playlistHeight, setPlaylistHeight] = useState<number | undefined>(undefined)
 
   useEffect(() => {
@@ -150,6 +152,16 @@ const StudioOriginals = () => {
     window.addEventListener('resize', updateHeight)
     return () => window.removeEventListener('resize', updateHeight)
   }, [])
+
+  useEffect(() => {
+    if (!hasInteracted) return
+    const video = videoRef.current
+    if (!video) return
+    const playPromise = video.play()
+    if (playPromise?.catch) {
+      playPromise.catch(() => undefined)
+    }
+  }, [activeId, hasInteracted])
 
   const toggleLike = (id: string) => {
     setLiked((prev) => {
@@ -197,6 +209,7 @@ const StudioOriginals = () => {
                     muted
                     playsInline
                     preload="metadata"
+                    ref={videoRef}
                     className={`w-full h-full ${isTall ? 'object-contain bg-slate-100' : 'object-cover'} rounded-none`}
                   />
                 </div>
@@ -219,10 +232,14 @@ const StudioOriginals = () => {
                   key={item.id}
                   role="button"
                   tabIndex={0}
-                  onClick={() => setActiveId(item.id)}
+                  onClick={() => {
+                    setHasInteracted(true)
+                    setActiveId(item.id)
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault()
+                      setHasInteracted(true)
                       setActiveId(item.id)
                     }
                   }}
