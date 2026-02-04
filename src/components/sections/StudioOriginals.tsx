@@ -1,8 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { mockProjectImages } from '../../store/mockData'
+import { fetchContent } from '../../lib/contentApi'
+import { MediaItem, normalizeMediaItem } from '../../lib/contentSections'
 import Reveal from '../ui/Reveal'
 
-const originals = [
+type OriginalItem = {
+  id: string
+  title: string
+  description: string
+  tag: string
+  year: string
+  duration: string
+  likes: number
+  src: string
+  poster: string
+  ratio: 'landscape' | 'portrait' | 'square'
+}
+
+
+const fallbackOriginals: OriginalItem[] = [
   {
     id: 'orig-01',
     title: 'Paper Worlds',
@@ -124,19 +140,54 @@ const formatCount = (value: number) => {
 }
 
 const StudioOriginals = () => {
-  const [activeId, setActiveId] = useState(originals[0]?.id ?? '')
+  const [items, setItems] = useState<OriginalItem[]>(fallbackOriginals)
+  const [activeId, setActiveId] = useState(fallbackOriginals[0]?.id ?? '')
   const [hasInteracted, setHasInteracted] = useState(false)
   const [likes, setLikes] = useState<Record<string, number>>(() => (
-    Object.fromEntries(originals.map((item) => [item.id, item.likes])) as Record<string, number>
+    Object.fromEntries(fallbackOriginals.map((item) => [item.id, item.likes])) as Record<string, number>
   ))
   const [liked, setLiked] = useState<Record<string, boolean>>(() => (
-    Object.fromEntries(originals.map((item) => [item.id, false])) as Record<string, boolean>
+    Object.fromEntries(fallbackOriginals.map((item) => [item.id, false])) as Record<string, boolean>
   ))
   const active = useMemo(
-    () => originals.find((item) => item.id === activeId) ?? originals[0],
-    [activeId],
+    () => items.find((item) => item.id === activeId) ?? items[0],
+    [activeId, items],
   )
   const isTall = active?.ratio !== 'landscape'
+
+  useEffect(() => {
+    let isCancelled = false
+
+    fetchContent<MediaItem[]>('originals').then((data) => {
+      if (isCancelled) return
+      if (!Array.isArray(data) || data.length === 0) return
+
+      const mapped = data.map((item) => {
+        const normalized = normalizeMediaItem(item)
+        return {
+          id: normalized.id,
+          title: normalized.title,
+          description: normalized.description,
+          tag: normalized.tag,
+          year: normalized.year,
+          duration: normalized.duration,
+          likes: normalized.likes,
+          src: normalized.videoUrl,
+          poster: normalized.posterUrl || mockProjectImages.motion[0],
+          ratio: normalized.ratio,
+        }
+      })
+
+      setItems(mapped)
+      setLikes(Object.fromEntries(mapped.map((item) => [item.id, item.likes])) as Record<string, number>)
+      setLiked(Object.fromEntries(mapped.map((item) => [item.id, false])) as Record<string, boolean>)
+      setActiveId((prev) => (mapped.some((item) => item.id === prev) ? prev : mapped[0].id))
+    })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [])
 
   const videoContainerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -227,7 +278,7 @@ const StudioOriginals = () => {
               className="overflow-y-auto pr-2"
               style={{ maxHeight: playlistHeight ? `${playlistHeight}px` : undefined }}
             >
-              {originals.map((item, index) => (
+              {items.map((item, index) => (
                 <div
                   key={item.id}
                   role="button"

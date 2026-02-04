@@ -1,0 +1,15 @@
+{
+  "name": "naolito-studio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy"
+  },
+  "dependencies": {
+    "sanity": "^3.63.0",
+    "styled-components": "^6.3.8"
+  }
+}

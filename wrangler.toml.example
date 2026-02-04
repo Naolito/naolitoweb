@@ -1,0 +1,16 @@
+name = "naolito-web"
+compatibility_date = "2025-02-19"
+
+# Only needed if you use Wrangler to run Pages Functions locally.
+# For Cloudflare Pages, set D1 bindings and env vars in the dashboard.
+
+[vars]
+CLOUDFLARE_ACCOUNT_ID = ""
+CLOUDFLARE_API_TOKEN = ""
+CLOUDFLARE_STREAM_CUSTOMER_CODE = ""
+ADMIN_API_TOKEN = ""
+
+[[d1_databases]]
+binding = "DB"
+database_name = "naolito-content"
+database_id = "REPLACE_ME"

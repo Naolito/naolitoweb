@@ -1,0 +1,40 @@
+export type ContentResponse<T> = {
+  data: T | null
+}
+
+const getAdminHeaders = () => {
+  const token = import.meta.env.VITE_ADMIN_API_TOKEN
+  if (!token) return {}
+  return {
+    Authorization: `Bearer ${token}`,
+  }
+}
+
+export const fetchContent = async <T>(key: string): Promise<T | null> => {
+  try {
+    const response = await fetch(`/api/content/${key}`)
+    if (!response.ok) return null
+    const payload = (await response.json()) as ContentResponse<T>
+    return payload?.data ?? null
+  } catch (error) {
+    return null
+  }
+}
+
+export const saveContent = async (key: string, data: unknown): Promise<boolean> => {
+  try {
+    const response = await fetch(`/api/content/${key}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAdminHeaders(),
+        },
+        body: JSON.stringify({ data }),
+      },
+    )
+    return response.ok
+  } catch (error) {
+    return false
+  }
+}

@@ -1,3 +1,9 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { mockProjectImages } from '../../store/mockData'
+import { fetchContent } from '../../lib/contentApi'
+import { ClientLogo as AdminClientLogo, MediaItem, normalizeClientLogo, normalizeMediaItem } from '../../lib/contentSections'
+import Reveal from '../ui/Reveal'
+
 const makeWordmark = (label: string) =>
   `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="80" viewBox="0 0 320 80">
@@ -5,17 +11,27 @@ const makeWordmark = (label: string) =>
     </svg>`
   )}`
 
-import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
-import { mockProjectImages } from '../../store/mockData'
-import Reveal from '../ui/Reveal'
-
 type ClientLogo = {
   name: string
   logo: string
   fallback?: string
 }
 
-const clients: ClientLogo[] = [
+type ClientProject = {
+  id: string
+  title: string
+  description: string
+  tag: string
+  year: string
+  duration: string
+  likes: number
+  src: string
+  poster: string
+  ratio: 'landscape' | 'portrait' | 'square'
+}
+
+
+const fallbackClients: ClientLogo[] = [
   {
     name: 'Netflix',
     logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg',
@@ -35,7 +51,7 @@ const clients: ClientLogo[] = [
   { name: 'Nestlé', logo: makeWordmark('Nestlé'), fallback: makeWordmark('Nestlé') },
 ]
 
-const pastProjects = [
+const fallbackPastProjects: ClientProject[] = [
   {
     id: 'client-01',
     title: 'Netflix Holiday Campaign',
@@ -97,19 +113,72 @@ const formatCount = (value: number) => {
 }
 
 const ClientLogos = () => {
-  const [activeId, setActiveId] = useState(pastProjects[0]?.id ?? '')
+  const [logos, setLogos] = useState<ClientLogo[]>(fallbackClients)
+  const [projects, setProjects] = useState<ClientProject[]>(fallbackPastProjects)
+  const [activeId, setActiveId] = useState(fallbackPastProjects[0]?.id ?? '')
   const [hasInteracted, setHasInteracted] = useState(false)
   const [likes, setLikes] = useState<Record<string, number>>(() => (
-    Object.fromEntries(pastProjects.map((item) => [item.id, item.likes])) as Record<string, number>
+    Object.fromEntries(fallbackPastProjects.map((item) => [item.id, item.likes])) as Record<string, number>
   ))
   const [liked, setLiked] = useState<Record<string, boolean>>(() => (
-    Object.fromEntries(pastProjects.map((item) => [item.id, false])) as Record<string, boolean>
+    Object.fromEntries(fallbackPastProjects.map((item) => [item.id, false])) as Record<string, boolean>
   ))
   const active = useMemo(
-    () => pastProjects.find((item) => item.id === activeId) ?? pastProjects[0],
-    [activeId],
+    () => projects.find((item) => item.id === activeId) ?? projects[0],
+    [activeId, projects],
   )
   const isTall = active?.ratio !== 'landscape'
+
+  useEffect(() => {
+    let isCancelled = false
+
+    Promise.all([
+      fetchContent<AdminClientLogo[]>('client-logos'),
+      fetchContent<MediaItem[]>('client-projects'),
+    ]).then(([logoData, projectData]) => {
+      if (isCancelled) return
+
+      const mappedLogos = (logoData || [])
+        .map((item) => normalizeClientLogo(item))
+        .filter((item) => item.logoUrl)
+        .map((item) => ({
+          name: item.name,
+          logo: item.logoUrl,
+          fallback: makeWordmark(item.name),
+        }))
+
+      if (mappedLogos.length > 0) {
+        setLogos(mappedLogos)
+      }
+
+      const mappedProjects = (projectData || [])
+        .map((item) => normalizeMediaItem(item))
+        .filter((item) => item.videoUrl)
+        .map((item) => ({
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          tag: item.tag,
+          year: item.year,
+          duration: item.duration,
+          likes: item.likes,
+          src: item.videoUrl,
+          poster: item.posterUrl || mockProjectImages.motion[0],
+          ratio: item.ratio,
+        }))
+
+      if (mappedProjects.length > 0) {
+        setProjects(mappedProjects)
+        setLikes(Object.fromEntries(mappedProjects.map((item) => [item.id, item.likes])) as Record<string, number>)
+        setLiked(Object.fromEntries(mappedProjects.map((item) => [item.id, false])) as Record<string, boolean>)
+        setActiveId((prev) => (mappedProjects.some((item) => item.id === prev) ? prev : mappedProjects[0].id))
+      }
+    })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [])
 
   const videoContainerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -156,7 +225,7 @@ const ClientLogos = () => {
           <div className="rounded-3xl border border-black/10 bg-white/90 p-6 sm:p-8 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
           <div className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">Global brands who trust us</div>
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {clients.map((client, index) => (
+            {logos.map((client, index) => (
               <div
                 key={client.name}
                 className="group relative overflow-hidden rounded-2xl border border-black/10 bg-white px-6 py-6 flex items-center justify-center hover:border-black/20 hover:bg-slate-50 transition-all client-card-animate"
@@ -225,7 +294,7 @@ const ClientLogos = () => {
                 className="overflow-y-auto pr-2"
                 style={{ maxHeight: playlistHeight ? `${playlistHeight}px` : undefined }}
               >
-                {pastProjects.map((item, index) => (
+                {projects.map((item, index) => (
                   <div
                     key={item.id}
                     role="button"
@@ -273,7 +342,7 @@ const ClientLogos = () => {
                           {item.description}
                         </div>
                         <div className="mt-2 text-[11px] uppercase tracking-[0.3em] text-slate-500">
-                          {item.duration} • {formatCount(likes[item.id])} likes
+                          {item.duration} • {formatCount(likes[item.id] ?? item.likes)} likes
                         </div>
                       </div>
                       <button
