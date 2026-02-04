@@ -23,15 +23,15 @@ const Navigation = () => {
           <Link
             key={link.path}
             to={link.path}
-              className={`relative text-sm font-medium transition-colors hover:text-primary-600 dark:hover:text-primary-400 ${
-                isActive(link.path)
-                  ? 'text-primary-600 dark:text-primary-500'
-                  : 'text-gray-700 dark:text-gray-300'
-              }`}
+            className={`relative text-sm font-medium transition-colors hover:text-sky-400 ${
+              isActive(link.path)
+                ? 'text-sky-400'
+                : 'text-slate-600'
+            }`}
           >
             {link.label}
             {isActive(link.path) && (
-              <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary-500 rounded-full" />
+              <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-sky-400 rounded-full" />
             )}
           </Link>
         ))}
@@ -40,7 +40,7 @@ const Navigation = () => {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="md:hidden relative w-10 h-10 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none"
+        className="md:hidden relative w-10 h-10 text-slate-700 hover:text-sky-500 focus:outline-none"
         aria-label="Toggle menu"
         aria-expanded={isMobileMenuOpen}
       >
@@ -66,7 +66,7 @@ const Navigation = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-20 left-0 right-0 bg-white/98 dark:bg-gray-900/98 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 shadow-2xl animate-slide-down">
+        <div className="md:hidden absolute top-20 left-0 right-0 bg-white/98 backdrop-blur-lg border-t border-gray-200 shadow-2xl animate-slide-down">
           <div className="container mx-auto px-4 py-6">
             <div className="flex flex-col space-y-4">
               {navLinks.map((link) => (
@@ -76,8 +76,8 @@ const Navigation = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`text-lg font-medium py-2 transition-colors ${
                     isActive(link.path)
-                      ? 'text-primary-600 dark:text-primary-500'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                      ? 'text-sky-400'
+                      : 'text-slate-700 hover:text-sky-500'
                   }`}
                 >
                   {link.label}
@@ -92,4 +92,3 @@ const Navigation = () => {
 }
 
 export default Navigation
-

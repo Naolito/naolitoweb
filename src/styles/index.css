@@ -2,9 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'DK Happy';
+  src: local('DK Happy'), local('DK Happy Regular');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   body {
-    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans;
+    @apply bg-[#f8fbff] text-slate-900 font-sans;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -16,6 +24,14 @@
   .clip-diagonal {
     clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
   }
+
+  .glass-panel {
+    @apply rounded-2xl border border-black/10 bg-white/80 backdrop-blur-xl shadow-sm;
+  }
+
+  .glass-panel-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:border-black/20 hover:bg-white;
+  }
 }
 
 @layer utilities {
@@ -24,7 +40,50 @@
   }
 
   .animate-marquee {
-    animation: marquee 30s linear infinite;
+    animation: marquee 42s linear infinite;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px) scale(0.98);
+    filter: blur(6px);
+    transition: opacity 0.7s ease, transform 0.7s ease, filter 0.7s ease;
+    will-change: opacity, transform, filter;
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+
+  .anim-delay-100 {
+    animation-delay: 100ms;
+    animation-fill-mode: both;
+  }
+
+  .anim-delay-200 {
+    animation-delay: 200ms;
+    animation-fill-mode: both;
+  }
+
+  .anim-delay-300 {
+    animation-delay: 300ms;
+    animation-fill-mode: both;
+  }
+
+  .anim-delay-400 {
+    animation-delay: 400ms;
+    animation-fill-mode: both;
   }
 }
 
@@ -34,6 +93,15 @@
   }
   100% {
     transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
   }
 }
 
@@ -48,14 +116,14 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: #f1f1ee;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4a5568;
+  background: #cbd5e1;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: #94a3b8;
 }

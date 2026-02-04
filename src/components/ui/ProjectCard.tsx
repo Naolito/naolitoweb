@@ -16,6 +16,9 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
             src={project.thumbnailUrl}
             alt={project.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            onError={(e) => {
+              e.currentTarget.src = `https://picsum.photos/seed/project-${project.id}/1200/800`
+            }}
           />
           
           {/* Category badge */}
@@ -68,4 +71,3 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
 }
 
 export default ProjectCard
-

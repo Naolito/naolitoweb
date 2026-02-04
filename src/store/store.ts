@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Project, TeamMember, Service, ContactInfo, StudioInfo } from '../types'
+import { mockProjectImages } from './mockData'
 
 // Mock data - will be replaced with Supabase calls in the future
 const mockProjects: Project[] = [
@@ -8,11 +9,11 @@ const mockProjects: Project[] = [
     title: 'Netflix Holiday Campaign',
     description: 'Character animation and visual development for Netflix\'s global holiday campaign featuring original characters and festive storytelling.',
     category: 'Character Design',
-    thumbnailUrl: 'https://picsum.photos/seed/netflix/800/600',
+    thumbnailUrl: mockProjectImages.character[0],
     videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     images: [
-      'https://picsum.photos/seed/netflix1/1200/800',
-      'https://picsum.photos/seed/netflix2/1200/800',
+      mockProjectImages.character[1],
+      mockProjectImages.character[2],
     ],
     client: 'Netflix',
     year: 2024,
@@ -23,11 +24,11 @@ const mockProjects: Project[] = [
     title: 'PlayStation 5 Launch Spot',
     description: '3D character animation for PlayStation 5 console launch commercial showcasing next-gen gaming experiences.',
     category: '3D Animation',
-    thumbnailUrl: 'https://picsum.photos/seed/playstation/800/600',
+    thumbnailUrl: mockProjectImages.animation3d[0],
     videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     images: [
-      'https://picsum.photos/seed/ps1/1200/800',
-      'https://picsum.photos/seed/ps2/1200/800',
+      mockProjectImages.animation3d[1],
+      mockProjectImages.animation3d[2],
     ],
     client: 'PlayStation',
     year: 2023,
@@ -38,9 +39,9 @@ const mockProjects: Project[] = [
     title: 'Amazon Prime Series Titles',
     description: 'Motion graphics and title sequence design for Amazon Prime Video original series with dynamic typography.',
     category: 'Motion Graphics',
-    thumbnailUrl: 'https://picsum.photos/seed/amazon/800/600',
+    thumbnailUrl: mockProjectImages.motion[0],
     images: [
-      'https://picsum.photos/seed/amazon1/1200/800',
+      mockProjectImages.motion[1],
     ],
     client: 'Amazon',
     year: 2024,
@@ -51,9 +52,9 @@ const mockProjects: Project[] = [
     title: 'Disney+ Character Development',
     description: 'Character design and animation development for Disney+ exclusive animated content with magical storytelling.',
     category: '2D Animation',
-    thumbnailUrl: 'https://picsum.photos/seed/disney/800/600',
+    thumbnailUrl: mockProjectImages.animation2d[0],
     images: [
-      'https://picsum.photos/seed/disney1/1200/800',
+      mockProjectImages.animation2d[1],
     ],
     client: 'Disney',
     year: 2023,
@@ -64,9 +65,9 @@ const mockProjects: Project[] = [
     title: 'Nestlé Product Campaign',
     description: 'Character-driven commercial animation for Nestlé product line launch featuring engaging brand mascots.',
     category: 'Character Design',
-    thumbnailUrl: 'https://picsum.photos/seed/nestle/800/600',
+    thumbnailUrl: mockProjectImages.character[1],
     images: [
-      'https://picsum.photos/seed/nestle1/1200/800',
+      mockProjectImages.character[2],
     ],
     client: 'Nestlé',
     year: 2024,
@@ -77,9 +78,9 @@ const mockProjects: Project[] = [
     title: 'Amazon Alexa Voice Assistant',
     description: 'Explainer animation showcasing Alexa features with engaging character storytelling and modern design.',
     category: 'Explainer Videos',
-    thumbnailUrl: 'https://picsum.photos/seed/alexa/800/600',
+    thumbnailUrl: mockProjectImages.explainer[0],
     images: [
-      'https://picsum.photos/seed/alexa1/1200/800',
+      mockProjectImages.explainer[1],
     ],
     client: 'Amazon',
     year: 2023,
@@ -90,9 +91,9 @@ const mockProjects: Project[] = [
     title: 'Tech Startup Brand Video',
     description: 'High-energy motion graphics showcase for a Silicon Valley tech startup featuring bold colors and modern aesthetics.',
     category: 'Motion Graphics',
-    thumbnailUrl: 'https://picsum.photos/seed/techstartup/800/600',
+    thumbnailUrl: mockProjectImages.motion[2],
     images: [
-      'https://picsum.photos/seed/tech1/1200/800',
+      mockProjectImages.motion[0],
     ],
     year: 2024,
     featured: false,
@@ -102,9 +103,9 @@ const mockProjects: Project[] = [
     title: 'Environmental Documentary',
     description: '2D animated sequences for nature documentary series with beautiful hand-drawn illustrations.',
     category: '2D Animation',
-    thumbnailUrl: 'https://picsum.photos/seed/envdoc/800/600',
+    thumbnailUrl: mockProjectImages.animation2d[2],
     images: [
-      'https://picsum.photos/seed/env1/1200/800',
+      mockProjectImages.animation2d[0],
     ],
     year: 2023,
     featured: false,
@@ -366,4 +367,3 @@ export const useStore = create<StoreState>((set, get) => ({
     return projects.filter(project => project.featured)
   },
 }))
-
