@@ -14,10 +14,15 @@ const buildJsonHeaders = () => {
 export const fetchContent = async <T>(key: string): Promise<T | null> => {
   try {
     const response = await fetch(`/api/content/${key}`)
-    if (!response.ok) return null
+    if (!response.ok) {
+      console.warn(`[fetchContent] ${key} returned ${response.status}`)
+      return null
+    }
     const payload = (await response.json()) as ContentResponse<T>
+    console.log(`[fetchContent] ${key}:`, payload?.data ? 'loaded' : 'empty')
     return payload?.data ?? null
   } catch (error) {
+    console.error(`[fetchContent] ${key} error:`, error)
     return null
   }
 }
