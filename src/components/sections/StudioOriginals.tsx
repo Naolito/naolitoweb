@@ -154,7 +154,6 @@ const StudioOriginals = () => {
     () => items.find((item) => item.id === activeId) ?? items[0],
     [activeId, items],
   )
-  const isTall = active?.ratio !== 'landscape'
 
   useEffect(() => {
     let isCancelled = false
@@ -247,9 +246,7 @@ const StudioOriginals = () => {
           <Reveal delay={160}>
             <div
               ref={videoContainerRef}
-              className={`relative overflow-hidden rounded-3xl border border-black/10 ${
-                isTall ? 'bg-slate-100' : 'bg-white'
-              } shadow-[0_20px_60px_rgba(15,23,42,0.08)]`}
+              className="relative overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
             >
                 {active && (
                   <div className="w-full aspect-video">
@@ -262,7 +259,7 @@ const StudioOriginals = () => {
                       playsInline
                       preload="metadata"
                       ref={videoRef}
-                      className={`w-full h-full ${isTall ? 'object-contain bg-slate-100' : 'object-cover'} rounded-none`}
+                      className="w-full h-full object-contain rounded-none"
                     />
                   </div>
                 )}
