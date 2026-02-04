@@ -1,3 +1,5 @@
+import * as tus from 'tus-js-client'
+
 export type ImageUploadResponse = {
   uploadURL: string
 }
@@ -14,6 +16,11 @@ export type VideoUploadResponse = {
   uid: string
   playbackUrl: string
   thumbnailUrl: string
+}
+
+export type VideoUploadRequest = {
+  size: number
+  maxDurationSeconds?: number
 }
 
 const buildJsonHeaders = () => {
@@ -47,10 +54,13 @@ export const requestImageUpload = async (): Promise<ImageUploadResponse> => {
   return response.json()
 }
 
-export const requestVideoUpload = async (): Promise<VideoUploadResponse> => {
+export const requestVideoUpload = async (
+  payload: VideoUploadRequest,
+): Promise<VideoUploadResponse> => {
   const response = await fetch('/api/upload/video', {
     method: 'POST',
     headers: buildJsonHeaders(),
+    body: JSON.stringify(payload),
   })
 
   if (!response.ok) {
@@ -58,6 +68,35 @@ export const requestVideoUpload = async (): Promise<VideoUploadResponse> => {
   }
 
   return response.json()
+}
+
+export const uploadVideoWithTus = (
+  uploadURL: string,
+  file: File,
+  options?: {
+    onProgress?: (percentage: number) => void
+  },
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const upload = new tus.Upload(file, {
+      uploadUrl: uploadURL,
+      chunkSize: 8 * 1024 * 1024,
+      retryDelays: [0, 1000, 3000, 5000, 10000],
+      onError: (error) => {
+        reject(error)
+      },
+      onProgress: (bytesUploaded, bytesTotal) => {
+        if (!options?.onProgress || bytesTotal === 0) return
+        const percentage = Math.round((bytesUploaded / bytesTotal) * 100)
+        options.onProgress(percentage)
+      },
+      onSuccess: () => {
+        resolve()
+      },
+    })
+
+    upload.start()
+  })
 }
 
 export const uploadFileToUrl = async (

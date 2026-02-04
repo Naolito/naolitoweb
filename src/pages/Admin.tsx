@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
 import { fetchContent, saveContent } from '../lib/contentApi'
-import { requestImageUpload, requestVideoUpload, resolveImageUrl, uploadFileToUrl } from '../lib/cloudflareUpload'
+import {
+  requestImageUpload,
+  requestVideoUpload,
+  resolveImageUrl,
+  uploadFileToUrl,
+  uploadVideoWithTus,
+} from '../lib/cloudflareUpload'
 import {
   ClientLogo,
   MediaItem,
@@ -19,6 +25,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState<Record<string, string>>({})
   const [uploading, setUploading] = useState<Record<string, boolean>>({})
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
 
   const setSectionStatus = (key: string, message: string) => {
     setStatus((prev) => ({ ...prev, [key]: message }))
@@ -83,6 +90,9 @@ const Admin = () => {
 
   const startUploading = (key: string) => setUploading((prev) => ({ ...prev, [key]: true }))
   const stopUploading = (key: string) => setUploading((prev) => ({ ...prev, [key]: false }))
+  const setProgress = (key: string, value: number) => {
+    setUploadProgress((prev) => ({ ...prev, [key]: value }))
+  }
 
   const handleVideoUpload = async (
     items: MediaItem[],
@@ -96,8 +106,11 @@ const Admin = () => {
 
     try {
       startUploading(uploadKey)
-      const upload = await requestVideoUpload()
-      await uploadFileToUrl(upload.uploadURL, file, { mode: 'no-cors', expectJson: false })
+      setProgress(uploadKey, 0)
+      const upload = await requestVideoUpload({ size: file.size })
+      await uploadVideoWithTus(upload.uploadURL, file, {
+        onProgress: (percentage) => setProgress(uploadKey, percentage),
+      })
 
       setter((prev) => {
         const next = [...prev]
@@ -113,6 +126,7 @@ const Admin = () => {
       setSectionStatus('upload', 'No se pudo subir el video. Reintenta.')
     } finally {
       stopUploading(uploadKey)
+      setProgress(uploadKey, 0)
     }
   }
 
@@ -330,7 +344,9 @@ const Admin = () => {
                         />
                       </label>
                       {uploading[`${item.id}-video`] && (
-                        <span className="text-xs text-slate-500">Subiendo...</span>
+                        <span className="text-xs text-slate-500">
+                          Subiendo {uploadProgress[`${item.id}-video`] ?? 0}%
+                        </span>
                       )}
                     </div>
                   </div>
@@ -487,7 +503,9 @@ const Admin = () => {
                         />
                       </label>
                       {uploading[`${item.id}-video`] && (
-                        <span className="text-xs text-slate-500">Subiendo...</span>
+                        <span className="text-xs text-slate-500">
+                          Subiendo {uploadProgress[`${item.id}-video`] ?? 0}%
+                        </span>
                       )}
                     </div>
                   </div>
