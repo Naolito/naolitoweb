@@ -11,9 +11,10 @@ interface NetworkSpeedInfo {
 }
 
 // Chunk sizes based on network speed
+// Note: Cloudflare Stream requires minimum 5,242,880 bytes (5 MB) per chunk
 const CHUNK_SIZES: Record<NetworkSpeedTier, number> = {
-  slow: 2 * 1024 * 1024,      // 2 MB for < 5 Mbps
-  medium: 4 * 1024 * 1024,    // 4 MB for 5-20 Mbps
+  slow: 5 * 1024 * 1024,      // 5 MB for < 5 Mbps (Cloudflare minimum)
+  medium: 6 * 1024 * 1024,    // 6 MB for 5-20 Mbps
   fast: 8 * 1024 * 1024,      // 8 MB for 20-50 Mbps
   'very-fast': 10 * 1024 * 1024, // 10 MB for > 50 Mbps
 }
