@@ -97,7 +97,7 @@ const Admin = () => {
     try {
       startUploading(uploadKey)
       const upload = await requestVideoUpload()
-      await uploadFileToUrl(upload.uploadURL, file)
+      await uploadFileToUrl(upload.uploadURL, file, { mode: 'no-cors', expectJson: false })
 
       setter((prev) => {
         const next = [...prev]

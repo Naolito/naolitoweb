@@ -60,17 +60,30 @@ export const requestVideoUpload = async (): Promise<VideoUploadResponse> => {
   return response.json()
 }
 
-export const uploadFileToUrl = async (url: string, file: File): Promise<ImageUploadResult> => {
+export const uploadFileToUrl = async (
+  url: string,
+  file: File,
+  options?: {
+    mode?: RequestMode
+    expectJson?: boolean
+  },
+): Promise<ImageUploadResult> => {
+  const { mode = 'cors', expectJson = true } = options ?? {}
   const form = new FormData()
   form.append('file', file)
 
   const response = await fetch(url, {
     method: 'POST',
     body: form,
+    mode,
   })
 
-  if (!response.ok) {
+  if (expectJson && !response.ok) {
     throw new Error('La subida ha fallado.')
+  }
+
+  if (!expectJson) {
+    return {}
   }
 
   return response.json()
