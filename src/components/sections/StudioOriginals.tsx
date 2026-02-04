@@ -226,13 +226,14 @@ const StudioOriginals = () => {
                       setActiveId(item.id)
                     }
                   }}
-                  className={`w-full text-left px-5 py-4 transition-all cursor-pointer ${
+                  className={`w-full text-left px-5 py-4 transition-all cursor-pointer playlist-item-animate ${
                     index > 0 ? 'border-t border-black/10' : ''
                   } ${
                     item.id === activeId
                       ? 'bg-sky-50'
                       : 'hover:bg-sky-50/60'
                   }`}
+                  style={{ animationDelay: `${180 + index * 140}ms` }}
                 >
                   <div className="flex gap-4 items-center">
                     <div className="relative w-20 h-14 rounded-xl overflow-hidden border border-black/10 bg-white">

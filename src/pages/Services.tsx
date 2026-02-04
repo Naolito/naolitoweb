@@ -55,18 +55,30 @@ const Services = () => {
               <div className="relative mb-10">
                 <div className="no-scrollbar overflow-x-auto md:overflow-visible pb-2 -mx-4 sm:mx-0 scroll-smooth">
                   <div className="relative w-full px-4 sm:px-0">
-                    <div className="absolute left-0 right-0 h-1 bg-sky-300 rounded-full" style={{ top: '10px' }} />
-                    <div className="flex md:grid md:grid-cols-12 gap-6 md:gap-0">
-                      {pipelineSteps.map((step) => (
+                    <div className="absolute left-0 right-0 h-1 bg-sky-200/80 rounded-full" style={{ top: '10px' }} />
+                    <div
+                    className="absolute left-0 right-0 h-1 rounded-full bg-gradient-to-r from-sky-400 via-cyan-400 to-sky-500 shadow-[0_0_12px_rgba(56,189,248,0.45)] pipeline-line-animate"
+                    style={{ top: '10px', animationDelay: '220ms' }}
+                  />
+                  <div className="flex md:grid md:grid-cols-12 gap-6 md:gap-0">
+                    {pipelineSteps.map((step, index) => (
                         <div
                           key={step}
                           className="min-w-[24%] md:min-w-0 md:col-span-1 flex flex-col items-center text-center px-1"
                         >
                           <div className="relative flex items-center justify-center">
                             <span className="h-5 w-5 rounded-full bg-white border-2 border-sky-300 shadow-[0_0_0_4px_rgba(255,255,255,0.9)]" />
-                            <span className="absolute h-2.5 w-2.5 rounded-full bg-sky-600" />
-                          </div>
-                          <div className="mt-3 text-[13px] font-semibold text-slate-900">{step}</div>
+                          <span
+                            className="absolute h-2.5 w-2.5 rounded-full bg-sky-600 pipeline-dot-animate"
+                            style={{ animationDelay: `${index * 140 + 420}ms` }}
+                          />
+                        </div>
+                        <div
+                          className="mt-3 text-[13px] font-semibold text-slate-900 pipeline-label-animate"
+                          style={{ animationDelay: `${index * 140 + 520}ms` }}
+                        >
+                          {step}
+                        </div>
                         </div>
                       ))}
                     </div>

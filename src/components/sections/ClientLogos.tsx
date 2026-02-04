@@ -5,7 +5,7 @@ const makeWordmark = (label: string) =>
     </svg>`
   )}`
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { mockProjectImages } from '../../store/mockData'
 import Reveal from '../ui/Reveal'
 
@@ -126,15 +126,16 @@ const ClientLogos = () => {
           <div className="rounded-3xl border border-black/10 bg-white/90 p-6 sm:p-8 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
           <div className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">Global brands who trust us</div>
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {clients.map((client) => (
+            {clients.map((client, index) => (
               <div
                 key={client.name}
-                className="group rounded-2xl border border-black/10 bg-white px-6 py-6 flex items-center justify-center hover:border-black/20 hover:bg-slate-50 transition-all"
+                className="group relative overflow-hidden rounded-2xl border border-black/10 bg-white px-6 py-6 flex items-center justify-center hover:border-black/20 hover:bg-slate-50 transition-all client-card-animate"
+                style={{ '--delay': `${index * 120 + 140}ms` } as CSSProperties}
               >
                 <img
                   src={client.logo}
                   alt={client.name}
-                  className="h-7 md:h-8 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
+                  className="h-7 md:h-8 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0 client-logo-animate"
                   loading="lazy"
                   onError={(event) => {
                     const target = event.currentTarget
@@ -205,13 +206,14 @@ const ClientLogos = () => {
                         setActiveId(item.id)
                       }
                     }}
-                    className={`w-full text-left px-5 py-4 transition-all cursor-pointer ${
+                    className={`w-full text-left px-5 py-4 transition-all cursor-pointer playlist-item-animate ${
                       index > 0 ? 'border-t border-black/10' : ''
                     } ${
                       item.id === activeId
                         ? 'bg-sky-50'
                         : 'hover:bg-sky-50/60'
                     }`}
+                    style={{ animationDelay: `${180 + index * 140}ms` }}
                   >
                     <div className="flex gap-4 items-center">
                       <div className="relative w-20 h-14 rounded-xl overflow-hidden border border-black/10 bg-white">

@@ -66,6 +66,175 @@
     filter: blur(0);
   }
 
+  .pipeline-line-animate {
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: pipeline-reveal 2.6s ease-out forwards;
+  }
+
+  .pipeline-dot-animate {
+    opacity: 0;
+    transform: scale(0.4);
+    animation: pipeline-dot 1s ease-out forwards;
+  }
+
+  .pipeline-label-animate {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: pipeline-label 1s ease-out forwards;
+  }
+
+  .performance-card-animate {
+    opacity: 0;
+    transform: translateX(-26px) translateY(10px) scale(0.98);
+    animation: performance-card 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .performance-icon-animate {
+    opacity: 0;
+    transform: scale(0.6) rotate(-8deg);
+    animation: performance-icon 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .performance-text-animate {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: performance-text 0.7s ease-out forwards;
+  }
+
+  .performance-metric-animate {
+    opacity: 0;
+    transform: translateX(14px);
+    animation: performance-metric 0.7s ease-out forwards;
+  }
+
+  .performance-label-animate {
+    opacity: 0;
+    transform: translateX(10px);
+    animation: performance-metric 0.7s ease-out forwards;
+  }
+
+  .impact-kicker-animate {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: impact-kicker 0.7s ease-out forwards;
+  }
+
+  .impact-line-animate {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(6px);
+    animation: impact-line 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .impact-gradient-animate {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+    filter: blur(6px);
+    background-size: 200% 200%;
+    background-position: 0% 50%;
+    animation: impact-gradient 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .playlist-item-animate {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+    animation: playlist-item 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .client-card-animate {
+    opacity: 0;
+    transform: translateX(-24px) translateY(18px) rotate(-2deg) scale(0.92);
+    filter: blur(6px);
+    animation: client-card-sweep 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: var(--delay, 0ms);
+    will-change: transform, opacity, filter;
+  }
+
+  .client-card-animate::after {
+    content: '';
+    position: absolute;
+    inset: -40% -30%;
+    border-radius: inherit;
+    background: linear-gradient(
+      120deg,
+      transparent 28%,
+      rgba(255, 255, 255, 0.75) 48%,
+      transparent 62%
+    );
+    opacity: 0;
+    transform: translateX(-120%);
+    animation: client-sheen 1.1s ease-out forwards;
+    animation-delay: calc(var(--delay, 0ms) + 140ms);
+    pointer-events: none;
+  }
+
+  .client-logo-animate {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+    animation: client-logo-pop 0.7s ease-out forwards;
+    animation-delay: calc(var(--delay, 0ms) + 200ms);
+  }
+
+  .reveal .pipeline-line-animate,
+  .reveal .pipeline-dot-animate,
+  .reveal .pipeline-label-animate {
+    animation-play-state: paused;
+  }
+
+  .reveal.is-visible .pipeline-line-animate,
+  .reveal.is-visible .pipeline-dot-animate,
+  .reveal.is-visible .pipeline-label-animate {
+    animation-play-state: running;
+  }
+
+  .reveal .performance-card-animate,
+  .reveal .performance-icon-animate,
+  .reveal .performance-text-animate,
+  .reveal .performance-metric-animate,
+  .reveal .performance-label-animate {
+    animation-play-state: paused;
+  }
+
+  .reveal.is-visible .performance-card-animate,
+  .reveal.is-visible .performance-icon-animate,
+  .reveal.is-visible .performance-text-animate,
+  .reveal.is-visible .performance-metric-animate,
+  .reveal.is-visible .performance-label-animate {
+    animation-play-state: running;
+  }
+
+  .reveal .impact-kicker-animate,
+  .reveal .impact-line-animate,
+  .reveal .impact-gradient-animate {
+    animation-play-state: paused;
+  }
+
+  .reveal.is-visible .impact-kicker-animate,
+  .reveal.is-visible .impact-line-animate,
+  .reveal.is-visible .impact-gradient-animate {
+    animation-play-state: running;
+  }
+
+  .reveal .playlist-item-animate {
+    animation-play-state: paused;
+  }
+
+  .reveal.is-visible .playlist-item-animate {
+    animation-play-state: running;
+  }
+
+  .reveal .client-card-animate,
+  .reveal .client-logo-animate {
+    animation-play-state: paused;
+  }
+
+  .reveal.is-visible .client-card-animate,
+  .reveal.is-visible .client-logo-animate {
+    animation-play-state: running;
+  }
+
   .anim-delay-100 {
     animation-delay: 100ms;
     animation-fill-mode: both;
@@ -87,6 +256,184 @@
   }
 }
 
+@keyframes pipeline-reveal {
+  0% {
+    opacity: 0.4;
+    transform: scaleX(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes pipeline-dot {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pipeline-label {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes performance-card {
+  0% {
+    opacity: 0;
+    transform: translateX(-26px) translateY(10px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1);
+  }
+}
+
+@keyframes performance-icon {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) rotate(-8deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.08) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes performance-text {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes performance-metric {
+  0% {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes impact-kicker {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes impact-line {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes impact-gradient {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+    filter: blur(6px);
+    background-position: 0% 50%;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes playlist-item {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes client-card-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-24px) translateY(18px) rotate(-2deg) scale(0.92);
+    filter: blur(6px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(6px) translateY(-4px) rotate(0.4deg) scale(1.02);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes client-logo-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes client-sheen {
+  0% {
+    opacity: 0;
+    transform: translateX(-120%);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}
+
 @keyframes marquee {
   0% {
     transform: translateX(0);
@@ -102,6 +449,47 @@
     transform: none;
     filter: none;
     transition: none;
+  }
+
+  .pipeline-line-animate,
+  .pipeline-dot-animate,
+  .pipeline-label-animate {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .performance-card-animate,
+  .performance-icon-animate,
+  .performance-text-animate,
+  .performance-metric-animate,
+  .performance-label-animate {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .impact-kicker-animate,
+  .impact-line-animate,
+  .impact-gradient-animate {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    animation: none;
+  }
+
+  .playlist-item-animate {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .client-card-animate,
+  .client-logo-animate {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    animation: none;
   }
 }
 

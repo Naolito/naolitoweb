@@ -30,13 +30,8 @@ const Header = () => {
             className="flex items-center space-x-2 group"
             aria-label="Animation Studio Home"
           >
-            <div className="flex flex-col">
-              <span className="text-2xl font-logo text-sky-400 leading-none tracking-[0.02em]">
-                Naolito
-              </span>
-              <span className="text-[11px] text-slate-500 uppercase tracking-[0.28em] leading-none">
-                Animation Studio
-              </span>
+            <div className="whitespace-nowrap text-2xl font-semibold text-sky-500 uppercase tracking-[0.35em] leading-none">
+              Naolito
             </div>
           </Link>
 
