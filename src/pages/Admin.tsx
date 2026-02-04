@@ -123,7 +123,8 @@ const Admin = () => {
         return next
       })
     } catch (error) {
-      setSectionStatus('upload', 'No se pudo subir el video. Reintenta.')
+      const message = error instanceof Error ? error.message : 'No se pudo subir el video. Reintenta.'
+      setSectionStatus('upload', message)
     } finally {
       stopUploading(uploadKey)
       setProgress(uploadKey, 0)

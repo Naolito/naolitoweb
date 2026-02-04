@@ -65,7 +65,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       return jsonResponse({ error: 'Cloudflare Stream TUS request failed', details }, 500)
     }
 
-    const uploadURL = response.headers.get('Location')
+    const rawUploadURL = response.headers.get('Location')
+    const uploadURL = rawUploadURL
+      ? new URL(rawUploadURL, 'https://upload.cloudflarestream.com').toString()
+      : null
     const uid = response.headers.get('stream-media-id') ?? uploadURL?.split('/').pop()
 
     if (!uploadURL || !uid) {

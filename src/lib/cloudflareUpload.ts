@@ -1,4 +1,4 @@
-import * as tus from 'tus-js-client'
+import { Upload } from 'tus-js-client'
 
 export type ImageUploadResponse = {
   uploadURL: string
@@ -78,8 +78,13 @@ export const uploadVideoWithTus = (
   },
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const upload = new tus.Upload(file, {
+    const upload = new Upload(file, {
       uploadUrl: uploadURL,
+      uploadSize: file.size,
+      metadata: {
+        filename: file.name,
+        filetype: file.type,
+      },
       chunkSize: 8 * 1024 * 1024,
       retryDelays: [0, 1000, 3000, 5000, 10000],
       onError: (error) => {
