@@ -43,11 +43,16 @@ const getImageVariant = () => {
 const parseApiError = async (response: Response, fallback: string) => {
   try {
     const data = await response.json()
-    const details =
+    const errorMessage =
       data?.error?.message ||
+      data?.error ||
       data?.message ||
-      (Array.isArray(data?.errors) && data.errors.length > 0 ? data.errors[0]?.message : null)
-    return details ? `${fallback} (${details})` : fallback
+      data?.details?.message ||
+      (Array.isArray(data?.errors) && data.errors.length > 0 ? data.errors[0]?.message : null) ||
+      (Array.isArray(data?.details?.errors) && data.details.errors.length > 0
+        ? data.details.errors[0]?.message
+        : null)
+    return errorMessage ? `${fallback} (${errorMessage})` : fallback
   } catch (error) {
     return fallback
   }
