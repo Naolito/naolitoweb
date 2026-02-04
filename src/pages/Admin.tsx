@@ -155,6 +155,16 @@ const Admin = () => {
     })
   }
 
+  const moveItem = <T,>(setter: Dispatch<SetStateAction<T[]>>, index: number, direction: 'up' | 'down') => {
+    setter((prev) => {
+      const next = [...prev]
+      const targetIndex = direction === 'up' ? index - 1 : index + 1
+      if (targetIndex < 0 || targetIndex >= next.length) return prev
+      ;[next[index], next[targetIndex]] = [next[targetIndex], next[index]]
+      return next
+    })
+  }
+
   const startUploading = (key: string) => setUploading((prev) => ({ ...prev, [key]: true }))
   const stopUploading = (key: string) => setUploading((prev) => ({ ...prev, [key]: false }))
   const setProgress = (key: string, value: UploadProgressInfo | null) => {
@@ -340,6 +350,36 @@ const Admin = () => {
                     <span>{item.videoUrl ? 'Video listo' : 'Sin video'}</span>
                     <span>{item.posterUrl ? 'Poster ok' : 'Sin poster'}</span>
                   </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        moveItem(setOriginals, index, 'up')
+                      }}
+                      disabled={index === 0}
+                      className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Mover arriba"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        moveItem(setOriginals, index, 'down')
+                      }}
+                      disabled={index === originals.length - 1}
+                      className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Mover abajo"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
                   <button
                     onClick={(event) => {
                       event.preventDefault()
@@ -492,6 +532,36 @@ const Admin = () => {
                   <div className="hidden sm:flex items-center gap-3 text-xs text-slate-400">
                     <span>{item.videoUrl ? 'Video listo' : 'Sin video'}</span>
                     <span>{item.posterUrl ? 'Poster ok' : 'Sin poster'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        moveItem(setClientProjects, index, 'up')
+                      }}
+                      disabled={index === 0}
+                      className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Mover arriba"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        moveItem(setClientProjects, index, 'down')
+                      }}
+                      disabled={index === clientProjects.length - 1}
+                      className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Mover abajo"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
                   </div>
                   <button
                     onClick={(event) => {
@@ -656,6 +726,28 @@ const Admin = () => {
                   />
                 </label>
                 {uploading[`${item.id}-logo`] && <span className="text-xs text-slate-500">Subiendo...</span>}
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => moveItem(setClientLogos, index, 'up')}
+                    disabled={index === 0}
+                    className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Mover arriba"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => moveItem(setClientLogos, index, 'down')}
+                    disabled={index === clientLogos.length - 1}
+                    className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Mover abajo"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
                 <button
                   onClick={() => setClientLogos((prev) => prev.filter((entry) => entry.id !== item.id))}
                   className="text-xs uppercase tracking-[0.2em] text-rose-500"
