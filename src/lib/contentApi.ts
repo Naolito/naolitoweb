@@ -2,12 +2,13 @@ export type ContentResponse<T> = {
   data: T | null
 }
 
-const getAdminHeaders = () => {
+const buildJsonHeaders = () => {
+  const headers = new Headers({ 'Content-Type': 'application/json' })
   const token = import.meta.env.VITE_ADMIN_API_TOKEN
-  if (!token) return {}
-  return {
-    Authorization: `Bearer ${token}`,
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
   }
+  return headers
 }
 
 export const fetchContent = async <T>(key: string): Promise<T | null> => {
@@ -23,16 +24,11 @@ export const fetchContent = async <T>(key: string): Promise<T | null> => {
 
 export const saveContent = async (key: string, data: unknown): Promise<boolean> => {
   try {
-    const response = await fetch(`/api/content/${key}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAdminHeaders(),
-        },
-        body: JSON.stringify({ data }),
-      },
-    )
+    const response = await fetch(`/api/content/${key}`, {
+      method: 'PUT',
+      headers: buildJsonHeaders(),
+      body: JSON.stringify({ data }),
+    })
     return response.ok
   } catch (error) {
     return false

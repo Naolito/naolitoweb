@@ -16,12 +16,13 @@ export type VideoUploadResponse = {
   thumbnailUrl: string
 }
 
-const getAdminHeaders = () => {
+const buildJsonHeaders = () => {
+  const headers = new Headers({ 'Content-Type': 'application/json' })
   const token = import.meta.env.VITE_ADMIN_API_TOKEN
-  if (!token) return {}
-  return {
-    Authorization: `Bearer ${token}`,
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
   }
+  return headers
 }
 
 const getImageDeliveryBase = () => {
@@ -35,10 +36,7 @@ const getImageVariant = () => {
 export const requestImageUpload = async (): Promise<ImageUploadResponse> => {
   const response = await fetch('/api/upload/image', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAdminHeaders(),
-    },
+    headers: buildJsonHeaders(),
     body: JSON.stringify({ metadata: { source: 'naolito-admin' } }),
   })
 
@@ -52,10 +50,7 @@ export const requestImageUpload = async (): Promise<ImageUploadResponse> => {
 export const requestVideoUpload = async (): Promise<VideoUploadResponse> => {
   const response = await fetch('/api/upload/video', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAdminHeaders(),
-    },
+    headers: buildJsonHeaders(),
   })
 
   if (!response.ok) {

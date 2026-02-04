@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { mockProjectImages } from '../../store/mockData'
 import { fetchContent } from '../../lib/contentApi'
 import { ClientLogo as AdminClientLogo, MediaItem, normalizeClientLogo, normalizeMediaItem } from '../../lib/contentSections'
