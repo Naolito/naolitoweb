@@ -3,6 +3,7 @@ import { mockProjectImages } from '../../store/mockData'
 import { fetchContent } from '../../lib/contentApi'
 import { ClientLogo as AdminClientLogo, MediaItem, normalizeClientLogo, normalizeMediaItem } from '../../lib/contentSections'
 import Reveal from '../ui/Reveal'
+import StreamVideo from '../ui/StreamVideo'
 
 const makeWordmark = (label: string) =>
   `data:image/svg+xml,${encodeURIComponent(
@@ -268,9 +269,9 @@ const ClientLogos = () => {
               >
                 {active && (
                   <div className="w-full aspect-video">
-                    <video
+                    <StreamVideo
                       key={active.id}
-                      src={active.src}
+                      source={active.src}
                       poster={active.poster}
                       controls
                       muted

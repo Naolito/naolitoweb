@@ -3,6 +3,7 @@ import { mockProjectImages } from '../../store/mockData'
 import { fetchContent } from '../../lib/contentApi'
 import { MediaItem, normalizeMediaItem } from '../../lib/contentSections'
 import Reveal from '../ui/Reveal'
+import StreamVideo from '../ui/StreamVideo'
 
 type OriginalItem = {
   id: string
@@ -250,21 +251,21 @@ const StudioOriginals = () => {
                 isTall ? 'bg-slate-100' : 'bg-white'
               } shadow-[0_20px_60px_rgba(15,23,42,0.08)]`}
             >
-              {active && (
-                <div className="w-full aspect-video">
-                  <video
-                    key={active.id}
-                    src={active.src}
-                    poster={active.poster}
-                    controls
-                    muted
-                    playsInline
-                    preload="metadata"
-                    ref={videoRef}
-                    className={`w-full h-full ${isTall ? 'object-contain bg-slate-100' : 'object-cover'} rounded-none`}
-                  />
-                </div>
-              )}
+                {active && (
+                  <div className="w-full aspect-video">
+                    <StreamVideo
+                      key={active.id}
+                      source={active.src}
+                      poster={active.poster}
+                      controls
+                      muted
+                      playsInline
+                      preload="metadata"
+                      ref={videoRef}
+                      className={`w-full h-full ${isTall ? 'object-contain bg-slate-100' : 'object-cover'} rounded-none`}
+                    />
+                  </div>
+                )}
               <div className="absolute top-4 left-4">
                 <span className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/90 px-3 py-1.5 text-[11px] uppercase tracking-[0.35em] text-sky-600 backdrop-blur">
                   Now Playing
