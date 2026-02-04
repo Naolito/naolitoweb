@@ -85,12 +85,6 @@ const Footer = () => {
                   Home
                 </Link>
                 <Link
-                  to="/portfolio"
-                  className="text-gray-700 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors text-sm"
-                >
-                  Portfolio
-                </Link>
-                <Link
                   to="/about"
                   className="text-gray-700 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors text-sm"
                 >
