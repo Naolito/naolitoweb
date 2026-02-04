@@ -9,12 +9,30 @@ import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { mockProjectImages } from '../../store/mockData'
 import Reveal from '../ui/Reveal'
 
-const clients = [
-  { name: 'Netflix', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg' },
-  { name: 'Amazon', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' },
-  { name: 'PlayStation', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg' },
-  { name: 'Disney', logo: makeWordmark('Disney') },
-  { name: 'Nestlé', logo: makeWordmark('Nestlé') },
+type ClientLogo = {
+  name: string
+  logo: string
+  fallback?: string
+}
+
+const clients: ClientLogo[] = [
+  {
+    name: 'Netflix',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg',
+    fallback: makeWordmark('Netflix'),
+  },
+  {
+    name: 'Amazon',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg',
+    fallback: makeWordmark('Amazon'),
+  },
+  {
+    name: 'PlayStation',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg',
+    fallback: makeWordmark('PlayStation'),
+  },
+  { name: 'Disney', logo: makeWordmark('Disney'), fallback: makeWordmark('Disney') },
+  { name: 'Nestlé', logo: makeWordmark('Nestlé'), fallback: makeWordmark('Nestlé') },
 ]
 
 const pastProjects = [
