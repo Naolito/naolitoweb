@@ -8,7 +8,7 @@ const Hero = () => {
   const studioInfo = useStore((state) => state.studioInfo)
 
   return (
-    <section className="relative min-h-[70vh] pt-24 pb-24 overflow-hidden bg-[#f8fbff]">
+    <section className="relative py-12 overflow-hidden bg-[#f8fbff]">
       {/* Background */}
       <div className="absolute inset-0">
         <div
@@ -39,22 +39,23 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
+        <div className="grid lg:grid-cols-[0.8fr_1.2fr] gap-12 items-center">
           {/* Left */}
           <div>
             <Reveal>
               <h1 className="mt-6 text-balance text-5xl sm:text-6xl lg:text-7xl font-display font-semibold text-slate-900 leading-[0.95]">
-                We build
+                Award winning
                 <span className="block bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
-                  iconic animation
+                  animation studio
                 </span>
-                that moves you
               </h1>
             </Reveal>
 
             <Reveal delay={140}>
               <p className="mt-6 text-lg md:text-xl text-slate-600 max-w-xl leading-relaxed">
-                {studioInfo.description}
+                Our films have been celebrated at international festivals, and we collaborate with clients all over
+                the world, from global brands to ambitious startups and creator-led teams. We bring big-studio craft
+                with a playful spirit, turning every brief into a story people feel, share, and remember.
               </p>
             </Reveal>
 
@@ -72,24 +73,13 @@ const Hero = () => {
 
           {/* Right - Structured Reel */}
           <Reveal delay={180}>
-            <div className="relative rounded-3xl overflow-hidden border border-black/10 bg-white h-[360px] sm:h-[420px] lg:h-[520px] shadow-[0_25px_60px_rgba(15,23,42,0.12)]">
+            <div className="relative rounded-3xl overflow-hidden border border-black/10 bg-white aspect-[18/9] shadow-[0_25px_60px_rgba(15,23,42,0.12)]">
               <img
                 src={heroBanner}
                 alt="Naolito originals on screen"
                 className="absolute inset-0 w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6">
-                <div className="text-xs uppercase tracking-[0.35em] text-white/70">Showreel</div>
-                <div className="mt-2 flex items-center justify-between">
-                  <div className="text-2xl font-display font-semibold text-white">2026 Highlights</div>
-                  <div className="w-12 h-12 rounded-full bg-white/20 border border-white/30 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
             </div>
           </Reveal>
         </div>

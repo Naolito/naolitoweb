@@ -59,10 +59,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2 mb-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-sm">N</span>
-              </div>
+            <div className="mb-3">
               <div>
                 <h3 className="text-lg font-display font-bold text-gray-900 dark:text-white leading-none">
                   Naolito
@@ -71,7 +68,7 @@ const Footer = () => {
               </div>
             </div>
             <p className="text-gray-700 dark:text-gray-400 text-sm">
-              Boutique animation studio crafting character-driven content for leading global brands.
+              Animation studio crafting character-driven content for leading global brands.
             </p>
           </div>
 
@@ -173,4 +170,3 @@ const Footer = () => {
 }
 
 export default Footer
-

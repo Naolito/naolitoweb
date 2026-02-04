@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { mockProjectImages } from '../../store/mockData'
 import Reveal from '../ui/Reveal'
 
@@ -51,6 +51,66 @@ const originals = [
     poster: mockProjectImages.animation3d[0],
     ratio: 'landscape',
   },
+  {
+    id: 'orig-05',
+    title: 'Paper Parade',
+    description: 'Handmade textures meet playful motion in a tiny paper universe.',
+    tag: 'Short Film',
+    year: '2025',
+    duration: '01:18',
+    likes: 1200,
+    src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    poster: mockProjectImages.animation2d[1],
+    ratio: 'landscape',
+  },
+  {
+    id: 'orig-06',
+    title: 'Candy Rockets',
+    description: 'A candy-colored sprint through speed lines and neon glows.',
+    tag: 'Studio Original',
+    year: '2025',
+    duration: '00:46',
+    likes: 871,
+    src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+    poster: mockProjectImages.motion[2],
+    ratio: 'landscape',
+  },
+  {
+    id: 'orig-07',
+    title: 'Tiny Giants',
+    description: 'A vertical-friendly short built for punchy reveals.',
+    tag: 'Social Short',
+    year: '2024',
+    duration: '00:52',
+    likes: 1400,
+    src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+    poster: mockProjectImages.character[2],
+    ratio: 'portrait',
+  },
+  {
+    id: 'orig-08',
+    title: 'Glitch Garden',
+    description: 'Experimental color blooms and character silhouettes.',
+    tag: 'Experimental',
+    year: '2023',
+    duration: '01:05',
+    likes: 632,
+    src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+    poster: mockProjectImages.motion[1],
+    ratio: 'square',
+  },
+  {
+    id: 'orig-09',
+    title: 'Starship Steps',
+    description: 'A playful music-driven micro short in a sci‑fi corridor.',
+    tag: 'Music Short',
+    year: '2024',
+    duration: '01:10',
+    likes: 980,
+    src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+    poster: mockProjectImages.animation3d[1],
+    ratio: 'landscape',
+  },
 ]
 
 const formatCount = (value: number) => {
@@ -76,6 +136,20 @@ const StudioOriginals = () => {
     [activeId],
   )
   const isTall = active?.ratio !== 'landscape'
+
+  const videoContainerRef = useRef<HTMLDivElement>(null)
+  const [playlistHeight, setPlaylistHeight] = useState<number | undefined>(undefined)
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (videoContainerRef.current) {
+        setPlaylistHeight(videoContainerRef.current.offsetHeight)
+      }
+    }
+    updateHeight()
+    window.addEventListener('resize', updateHeight)
+    return () => window.removeEventListener('resize', updateHeight)
+  }, [])
 
   const toggleLike = (id: string) => {
     setLiked((prev) => {
@@ -108,6 +182,7 @@ const StudioOriginals = () => {
         <div className="mt-6 grid lg:grid-cols-[1.35fr_0.65fr] gap-10 items-start">
           <Reveal delay={160}>
             <div
+              ref={videoContainerRef}
               className={`relative overflow-hidden rounded-3xl border border-black/10 ${
                 isTall ? 'bg-slate-100' : 'bg-white'
               } shadow-[0_20px_60px_rgba(15,23,42,0.08)]`}
@@ -135,7 +210,10 @@ const StudioOriginals = () => {
           </Reveal>
 
           <Reveal delay={240} className="relative">
-            <div className="lg:h-[520px] overflow-y-auto pr-2">
+            <div
+              className="overflow-y-auto pr-2"
+              style={{ maxHeight: playlistHeight ? `${playlistHeight}px` : undefined }}
+            >
               {originals.map((item, index) => (
                 <div
                   key={item.id}
@@ -179,7 +257,7 @@ const StudioOriginals = () => {
                         {item.description}
                       </div>
                       <div className="mt-2 text-[11px] uppercase tracking-[0.3em] text-slate-500">
-                        {item.duration} • {formatCount(likes[item.id])} likes
+                        {item.duration} • {formatCount(likes[item.id] ?? item.likes)} likes
                       </div>
                     </div>
                     <button

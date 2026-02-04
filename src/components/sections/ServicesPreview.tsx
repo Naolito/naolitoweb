@@ -215,6 +215,19 @@ const serviceGroups = [
           </svg>
         ),
       },
+      {
+        title: 'Product Design',
+        description: 'Product-led storytelling and launch visuals for digital experiences.',
+        link: '/services',
+        tone: 'from-indigo-100 to-sky-100 text-indigo-600 border-indigo-200',
+        icon: (
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+            <rect x="4" y="4" width="16" height="12" rx="2" />
+            <path d="M8 20h8" />
+            <path d="M9 12h6" />
+          </svg>
+        ),
+      },
     ],
   },
 ]
