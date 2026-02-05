@@ -114,6 +114,8 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
     if (!video || !resolvedSource || isResolving) return
 
     console.log('[StreamVideo DEBUG] Setting up video with resolved source:', resolvedSource)
+    console.log('[StreamVideo DEBUG] Video element muted:', video.muted)
+    console.log('[StreamVideo DEBUG] Video has muted attribute:', video.hasAttribute('muted'))
     console.log('[StreamVideo DEBUG] Browser:', navigator.userAgent)
     console.log('[StreamVideo DEBUG] canPlayType HLS:', video.canPlayType('application/vnd.apple.mpegurl'))
     console.log('[StreamVideo DEBUG] HLS.isSupported:', Hls.isSupported())
@@ -184,7 +186,8 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
     video.load()
   }, [resolvedSource, isResolving])
 
-  return <video ref={innerRef} {...props} />
+  // Explicitly ensure volume control is available
+  return <video ref={innerRef} controls={true} {...props} />
 })
 
 StreamVideo.displayName = 'StreamVideo'
