@@ -18,6 +18,10 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
   }
+
+  .font-display {
+    font-family: "Sora", system-ui, sans-serif !important;
+  }
 }
 
 @layer components {
@@ -83,6 +87,33 @@
     opacity: 0;
     transform: translateY(8px);
     animation: pipeline-label 1s ease-out forwards;
+  }
+
+  .pipeline-branch-animate {
+    stroke-dasharray: 140;
+    stroke-dashoffset: 140;
+    animation: pipeline-branch 0.9s ease-out forwards;
+  }
+
+  .pipeline-branch-end {
+    opacity: 0;
+    transform: translateX(-6px);
+    animation: pipeline-branch-end 0.45s ease-out forwards;
+  }
+
+  .pipeline-confetti-animate {
+    opacity: 0;
+    animation: pipeline-confetti 0.9s ease-out forwards;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 6px;
+    height: 10px;
+    border-radius: 2px;
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+    animation: confetti-piece 0.9s ease-out forwards;
   }
 
   .performance-card-animate {
@@ -179,13 +210,21 @@
 
   .reveal .pipeline-line-animate,
   .reveal .pipeline-dot-animate,
-  .reveal .pipeline-label-animate {
+  .reveal .pipeline-label-animate,
+  .reveal .pipeline-branch-animate,
+  .reveal .pipeline-branch-end,
+  .reveal .pipeline-confetti-animate,
+  .reveal .confetti-piece {
     animation-play-state: paused;
   }
 
   .reveal.is-visible .pipeline-line-animate,
   .reveal.is-visible .pipeline-dot-animate,
-  .reveal.is-visible .pipeline-label-animate {
+  .reveal.is-visible .pipeline-label-animate,
+  .reveal.is-visible .pipeline-branch-animate,
+  .reveal.is-visible .pipeline-branch-end,
+  .reveal.is-visible .pipeline-confetti-animate,
+  .reveal.is-visible .confetti-piece {
     animation-play-state: running;
   }
 
@@ -290,6 +329,52 @@
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes pipeline-branch {
+  0% {
+    stroke-dashoffset: 140;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pipeline-branch-end {
+  0% {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pipeline-confetti {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes confetti-piece {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(1);
   }
 }
 
