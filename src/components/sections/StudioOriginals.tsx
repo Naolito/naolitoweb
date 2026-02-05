@@ -193,12 +193,22 @@ const StudioOriginals = () => {
   const videoContainerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [playlistHeight, setPlaylistHeight] = useState<number | undefined>(undefined)
+
+  // Create a mutable ref for intersection observer
+  const containerRef = useRef<HTMLDivElement>(null)
   const { ref: inViewRef, isInView } = useInView({ threshold: 0.5, once: false })
+
+  // Combine refs effect
+  useEffect(() => {
+    if (containerRef.current && inViewRef.current !== containerRef.current) {
+      (inViewRef as React.MutableRefObject<HTMLDivElement | null>).current = containerRef.current
+    }
+  }, [inViewRef])
 
   useEffect(() => {
     const updateHeight = () => {
-      if (videoContainerRef.current) {
-        setPlaylistHeight(videoContainerRef.current.offsetHeight)
+      if (containerRef.current) {
+        setPlaylistHeight(containerRef.current.offsetHeight)
       }
     }
     updateHeight()
@@ -277,11 +287,7 @@ const StudioOriginals = () => {
         <div className="mt-6 grid lg:grid-cols-[1.35fr_0.65fr] gap-10 items-start">
           <Reveal delay={160}>
             <div
-              ref={(node) => {
-                // Combine refs using callback
-                videoContainerRef.current = node;
-                (inViewRef as React.MutableRefObject<HTMLDivElement | null>).current = node
-              }}
+              ref={containerRef}
               className="relative overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
             >
                 {active && (
