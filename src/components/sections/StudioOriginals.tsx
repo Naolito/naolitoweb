@@ -278,11 +278,9 @@ const StudioOriginals = () => {
           <Reveal delay={160}>
             <div
               ref={(node) => {
-                // Combine refs
-                if (node) {
-                  videoContainerRef.current = node
-                  inViewRef.current = node
-                }
+                // Combine refs using callback
+                videoContainerRef.current = node;
+                (inViewRef as React.MutableRefObject<HTMLDivElement | null>).current = node
               }}
               className="relative overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
             >
