@@ -35,8 +35,7 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
       // Force highest quality once manifest is loaded
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
         const highestLevel = data.levels.length - 1
-        // Disable ABR and force highest quality
-        hls.autoLevelEnabled = false
+        // Force highest quality by setting loadLevel (disables ABR when set to non-negative value)
         hls.loadLevel = highestLevel
         console.log(`[HLS] Forcing highest quality level ${highestLevel} of ${data.levels.length}`, data.levels[highestLevel])
       })
