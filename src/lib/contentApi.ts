@@ -21,6 +21,7 @@ export const fetchContent = async <T>(key: string): Promise<T | null> => {
   try {
     const baseUrl = getContentBaseUrl()
     const url = baseUrl ? `${baseUrl}/api/content/${key}` : `/api/content/${key}`
+    console.log(`[fetchContent] GET ${url}`)
     const response = await fetch(url)
     if (!response.ok) {
       console.warn(`[fetchContent] ${key} returned ${response.status}`)
@@ -39,6 +40,7 @@ export const saveContent = async (key: string, data: unknown): Promise<boolean> 
   try {
     const baseUrl = getContentBaseUrl()
     const url = baseUrl ? `${baseUrl}/api/content/${key}` : `/api/content/${key}`
+    console.log(`[fetchContent] PUT ${url}`)
     const response = await fetch(url, {
       method: 'PUT',
       headers: buildJsonHeaders(),
