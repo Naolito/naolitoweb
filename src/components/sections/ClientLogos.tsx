@@ -199,10 +199,26 @@ const ClientLogos = () => {
     if (!hasInteracted) return
     const video = videoRef.current
     if (!video) return
-    const playPromise = video.play()
-    if (playPromise?.catch) {
-      playPromise.catch(() => undefined)
+
+    // Wait for video to be ready before playing
+    const attemptPlay = () => {
+      if (video.readyState >= 2) { // HAVE_CURRENT_DATA or better
+        const playPromise = video.play()
+        if (playPromise?.catch) {
+          playPromise.catch(() => undefined)
+        }
+      } else {
+        // Video not ready yet, wait for it
+        video.addEventListener('loadeddata', () => {
+          const playPromise = video.play()
+          if (playPromise?.catch) {
+            playPromise.catch(() => undefined)
+          }
+        }, { once: true })
+      }
     }
+
+    attemptPlay()
   }, [activeId, hasInteracted])
 
   const toggleLike = (id: string) => {
