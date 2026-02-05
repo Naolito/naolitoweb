@@ -326,10 +326,10 @@ const ClientLogos = () => {
             <Reveal delay={160}>
               <div
                 ref={containerRef}
-                className="relative overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
+                className="relative overflow-hidden rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
               >
                 {active && (
-                  <div className="w-full aspect-video">
+                  <div className="w-full aspect-video rounded-3xl overflow-hidden">
                     <StreamVideo
                       key={active.id}
                       source={active.src}
@@ -338,7 +338,7 @@ const ClientLogos = () => {
                       playsInline
                       preload="metadata"
                       ref={videoRef}
-                      className="w-full h-full object-contain rounded-none"
+                      className="w-full h-full object-cover rounded-3xl"
                     />
                   </div>
                 )}
