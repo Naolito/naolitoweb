@@ -26,18 +26,18 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
         backBufferLength: 0,
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
-        startLevel: -1, // Start with auto, then force highest
+        startLevel: 99, // Start at highest available quality (HLS.js will use max if this exceeds available levels)
         capLevelToPlayerSize: false, // Don't limit quality based on player size
         abrEwmaDefaultEstimate: 50000000, // Assume 50 Mbps connection
         abrEwmaDefaultEstimateMax: 50000000,
       })
 
-      // Force highest quality once manifest is loaded
+      // Force highest quality to stay locked
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
         const highestLevel = data.levels.length - 1
-        // Force highest quality by setting loadLevel (disables ABR when set to non-negative value)
+        // Lock to highest quality by setting loadLevel (disables ABR when set to non-negative value)
         hls.loadLevel = highestLevel
-        console.log(`[HLS] Forcing highest quality level ${highestLevel} of ${data.levels.length}`, data.levels[highestLevel])
+        console.log(`[HLS] Locked to highest quality level ${highestLevel} of ${data.levels.length}`, data.levels[highestLevel])
       })
 
       // Monitor level changes (for debugging)
