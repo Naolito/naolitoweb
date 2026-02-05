@@ -5,66 +5,6 @@ type StreamVideoProps = Omit<React.VideoHTMLAttributes<HTMLVideoElement>, 'src'>
   source: string
 }
 
-/**
- * Extract highest quality stream URL from Cloudflare Stream HLS manifest
- * This bypasses ABR and forces highest quality from the start
- */
-const getHighestQualityStreamUrl = async (manifestUrl: string): Promise<string | null> => {
-  try {
-    console.log('[StreamVideo DEBUG] Fetching manifest from:', manifestUrl)
-    const response = await fetch(manifestUrl)
-
-    console.log('[StreamVideo DEBUG] Response status:', response.status, response.statusText)
-    if (!response.ok) {
-      console.error('[StreamVideo DEBUG] Failed to fetch manifest')
-      return null
-    }
-
-    const manifestText = await response.text()
-    console.log('[StreamVideo DEBUG] Manifest content:\n', manifestText)
-
-    // Parse HLS manifest to find all stream variants
-    // Format: #EXT-X-STREAM-INF:RESOLUTION=1920x1080,...\npath/to/stream.m3u8
-    const streamRegex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+)x(\d+).*\n(.+)/gm
-    const streams: Array<{ width: number; height: number; url: string }> = []
-
-    let match
-    while ((match = streamRegex.exec(manifestText)) !== null) {
-      const width = parseInt(match[1], 10)
-      const height = parseInt(match[2], 10)
-      const streamPath = match[3].trim()
-
-      console.log('[StreamVideo DEBUG] Found stream:', { width, height, path: streamPath })
-      streams.push({ width, height, url: streamPath })
-    }
-
-    console.log('[StreamVideo DEBUG] Total streams found:', streams.length)
-
-    if (streams.length === 0) {
-      console.error('[StreamVideo DEBUG] No streams found in manifest')
-      return null
-    }
-
-    // Sort by resolution (width × height) and get highest
-    streams.sort((a, b) => (b.width * b.height) - (a.width * a.height))
-    const highestQuality = streams[0]
-
-    // Build full URL (handle relative paths)
-    const baseUrl = manifestUrl.substring(0, manifestUrl.lastIndexOf('/'))
-    const fullUrl = highestQuality.url.startsWith('http')
-      ? highestQuality.url
-      : `${baseUrl}/${highestQuality.url}`
-
-    console.log('[StreamVideo DEBUG] Selected highest quality:', highestQuality)
-    console.log('[StreamVideo DEBUG] Final URL:', fullUrl)
-
-    return fullUrl
-  } catch (error) {
-    console.error('[StreamVideo DEBUG] Exception while parsing manifest:', error)
-    return null
-  }
-}
-
 const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ...props }, ref) => {
   const innerRef = useRef<HTMLVideoElement>(null)
   const [resolvedSource, setResolvedSource] = useState<string>(source)
@@ -72,7 +12,7 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
 
   useImperativeHandle(ref, () => innerRef.current as HTMLVideoElement)
 
-  // Resolve highest quality stream for Cloudflare Stream
+  // Resolve stream source (keep Cloudflare master manifest to preserve audio tracks)
   useEffect(() => {
     console.log('[StreamVideo DEBUG] Source changed:', source)
     const isCloudflareStream = (
@@ -83,30 +23,12 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
 
     if (!isCloudflareStream) {
       console.log('[StreamVideo DEBUG] Not Cloudflare Stream, using source as-is')
-      setIsResolving(false)
-      setResolvedSource(source)
-      return
+    } else {
+      console.log('[StreamVideo DEBUG] Cloudflare Stream detected, using master manifest to preserve audio tracks')
     }
 
-    let cancelled = false
-    setIsResolving(true)
-
-    console.log('[StreamVideo DEBUG] Attempting to resolve highest quality URL...')
-    getHighestQualityStreamUrl(source).then((highQualityUrl) => {
-      if (cancelled) return
-      if (highQualityUrl) {
-        console.log('[StreamVideo DEBUG] ✅ Using direct high-quality stream URL:', highQualityUrl)
-        setResolvedSource(highQualityUrl)
-      } else {
-        console.log('[StreamVideo DEBUG] ❌ Failed to resolve, falling back to original:', source)
-        setResolvedSource(source)
-      }
-      setIsResolving(false)
-    })
-
-    return () => {
-      cancelled = true
-    }
+    setIsResolving(false)
+    setResolvedSource(source)
   }, [source])
 
   useEffect(() => {
@@ -120,12 +42,19 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
     console.log('[StreamVideo DEBUG] canPlayType HLS:', video.canPlayType('application/vnd.apple.mpegurl'))
     console.log('[StreamVideo DEBUG] HLS.isSupported:', Hls.isSupported())
 
-    // CRITICAL: Set muted via property BEFORE any play attempt
-    // This enables autoplay while keeping volume control available
+    // Start muted to allow autoplay, then unmute on first user interaction
     video.muted = true
-    video.volume = 1.0 // Ensure volume is at max when user unmutes
+    video.volume = 1.0
 
-    console.log('[StreamVideo DEBUG] Set muted=true, volume=1.0')
+    const enableSound = () => {
+      video.muted = false
+      video.removeAttribute('muted')
+      video.volume = 1.0
+      console.log('[StreamVideo DEBUG] User interacted: unmuted video')
+    }
+
+    window.addEventListener('pointerdown', enableSound, { once: true })
+    window.addEventListener('keydown', enableSound, { once: true })
 
     // Force HLS.js for Cloudflare Stream to have full control over quality
     const isCloudflareStream = resolvedSource.includes('cloudflarestream.com') || resolvedSource.includes('videodelivery.net')
@@ -134,7 +63,10 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
       console.log('[StreamVideo DEBUG] Using native HLS (Safari/iOS) for non-Cloudflare video')
       video.src = resolvedSource
       video.load()
-      return
+      return () => {
+        window.removeEventListener('pointerdown', enableSound)
+        window.removeEventListener('keydown', enableSound)
+      }
     }
 
     if (Hls.isSupported()) {
@@ -185,12 +117,18 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
       hls.attachMedia(video)
 
       return () => {
+        window.removeEventListener('pointerdown', enableSound)
+        window.removeEventListener('keydown', enableSound)
         hls.destroy()
       }
     }
 
     video.src = resolvedSource
     video.load()
+    return () => {
+      window.removeEventListener('pointerdown', enableSound)
+      window.removeEventListener('keydown', enableSound)
+    }
   }, [resolvedSource, isResolving])
 
   // Never add muted attribute to HTML - we handle it via JavaScript
