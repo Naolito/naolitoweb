@@ -243,9 +243,6 @@ const StudioOriginals = () => {
 
     // Wait for video to be ready before playing
     const attemptPlay = () => {
-      // Mute for autoplay to work, but user can unmute via controls
-      video.muted = true
-
       if (video.readyState >= 2) { // HAVE_CURRENT_DATA or better
         const playPromise = video.play()
         if (playPromise?.catch) {

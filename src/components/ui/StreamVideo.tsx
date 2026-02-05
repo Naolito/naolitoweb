@@ -184,7 +184,26 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
     video.load()
   }, [resolvedSource, isResolving])
 
-  return <video ref={innerRef} {...props} />
+  // Add effect to allow unmuting after video starts
+  useEffect(() => {
+    const video = innerRef.current
+    if (!video) return
+
+    // Remove muted attribute after first play to enable volume controls
+    const handlePlay = () => {
+      // Keep the video muted via property, but remove the attribute
+      // This allows the user to unmute via controls
+      video.removeAttribute('muted')
+    }
+
+    video.addEventListener('play', handlePlay, { once: true })
+
+    return () => {
+      video.removeEventListener('play', handlePlay)
+    }
+  }, [])
+
+  return <video ref={innerRef} muted {...props} />
 })
 
 StreamVideo.displayName = 'StreamVideo'
