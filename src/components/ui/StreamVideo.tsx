@@ -26,6 +26,8 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
         backBufferLength: 0,
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
+        startLevel: -1, // Start with auto, then force highest
+        capLevelToPlayerSize: false, // Don't limit quality based on player size
         abrEwmaDefaultEstimate: 50000000, // Assume 50 Mbps connection
         abrEwmaDefaultEstimateMax: 50000000,
       })
@@ -33,20 +35,15 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
       // Force highest quality once manifest is loaded
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
         const highestLevel = data.levels.length - 1
-        hls.currentLevel = highestLevel
-        hls.nextLevel = highestLevel
-        hls.autoLevelCapping = highestLevel
-        console.log(`[HLS] Forcing level ${highestLevel} of ${data.levels.length}`, data.levels)
+        // Disable ABR and force highest quality
+        hls.autoLevelEnabled = false
+        hls.loadLevel = highestLevel
+        console.log(`[HLS] Forcing highest quality level ${highestLevel} of ${data.levels.length}`, data.levels[highestLevel])
       })
 
-      // Keep forcing highest quality
+      // Monitor level changes (for debugging)
       hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
-        const highestLevel = hls.levels.length - 1
-        if (data.level < highestLevel) {
-          console.log(`[HLS] Level dropped to ${data.level}, forcing back to ${highestLevel}`)
-          hls.currentLevel = highestLevel
-          hls.nextLevel = highestLevel
-        }
+        console.log(`[HLS] Now playing level ${data.level}:`, hls.levels[data.level])
       })
 
       hls.loadSource(source)
