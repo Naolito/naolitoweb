@@ -65,7 +65,7 @@ const getHighestQualityStreamUrl = async (manifestUrl: string): Promise<string |
   }
 }
 
-const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, autoPlay, ...props }, ref) => {
+const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ...props }, ref) => {
   const innerRef = useRef<HTMLVideoElement>(null)
   const [resolvedSource, setResolvedSource] = useState<string>(source)
   const [isResolving, setIsResolving] = useState<boolean>(false)
@@ -114,7 +114,6 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, au
     if (!video || !resolvedSource || isResolving) return
 
     console.log('[StreamVideo DEBUG] Setting up video with resolved source:', resolvedSource)
-    console.log('[StreamVideo DEBUG] autoPlay:', autoPlay)
     console.log('[StreamVideo DEBUG] Browser:', navigator.userAgent)
     console.log('[StreamVideo DEBUG] canPlayType HLS:', video.canPlayType('application/vnd.apple.mpegurl'))
     console.log('[StreamVideo DEBUG] HLS.isSupported:', Hls.isSupported())
@@ -173,19 +172,6 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, au
         console.log('[HLS DEBUG] Fragment loaded:', data.frag.sn, 'level:', data.frag.level)
       })
 
-      // Handle autoplay when video is ready
-      if (autoPlay) {
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          console.log('[HLS DEBUG] Manifest parsed, attempting autoplay...')
-          // Wait a bit for buffer
-          setTimeout(() => {
-            video.play().catch((error) => {
-              console.warn('[HLS DEBUG] Autoplay failed:', error)
-            })
-          }, 100)
-        })
-      }
-
       hls.loadSource(resolvedSource)
       hls.attachMedia(video)
 
@@ -196,20 +182,9 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, au
 
     video.src = resolvedSource
     video.load()
+  }, [resolvedSource, isResolving])
 
-    // Handle autoplay for non-HLS.js playback
-    if (autoPlay) {
-      const handleCanPlay = () => {
-        console.log('[StreamVideo DEBUG] Video can play, attempting autoplay...')
-        video.play().catch((error) => {
-          console.warn('[StreamVideo DEBUG] Autoplay failed:', error)
-        })
-      }
-      video.addEventListener('canplay', handleCanPlay, { once: true })
-    }
-  }, [resolvedSource, isResolving, autoPlay])
-
-  return <video ref={innerRef} autoPlay={autoPlay} {...props} />
+  return <video ref={innerRef} {...props} />
 })
 
 StreamVideo.displayName = 'StreamVideo'

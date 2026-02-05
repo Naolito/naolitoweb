@@ -4,6 +4,7 @@ import { fetchContent } from '../../lib/contentApi'
 import { MediaItem, normalizeMediaItem } from '../../lib/contentSections'
 import Reveal from '../ui/Reveal'
 import StreamVideo from '../ui/StreamVideo'
+import useInView from '../ui/useInView'
 
 type OriginalItem = {
   id: string
@@ -192,6 +193,7 @@ const StudioOriginals = () => {
   const videoContainerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [playlistHeight, setPlaylistHeight] = useState<number | undefined>(undefined)
+  const { ref: inViewRef, isInView } = useInView({ threshold: 0.5, once: false })
 
   useEffect(() => {
     const updateHeight = () => {
@@ -205,9 +207,13 @@ const StudioOriginals = () => {
   }, [])
 
   useEffect(() => {
-    if (!hasInteracted) return
     const video = videoRef.current
     if (!video) return
+
+    // Only play if: (user interacted and changed video) OR (video is in viewport for first time)
+    const shouldPlay = (hasInteracted || isInView)
+
+    if (!shouldPlay) return
 
     // Wait for video to be ready before playing
     const attemptPlay = () => {
@@ -228,7 +234,17 @@ const StudioOriginals = () => {
     }
 
     attemptPlay()
-  }, [activeId, hasInteracted])
+  }, [activeId, hasInteracted, isInView])
+
+  // Pause video when out of view
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    if (!isInView && !video.paused) {
+      video.pause()
+    }
+  }, [isInView])
 
   const toggleLike = (id: string) => {
     setLiked((prev) => {
@@ -261,7 +277,13 @@ const StudioOriginals = () => {
         <div className="mt-6 grid lg:grid-cols-[1.35fr_0.65fr] gap-10 items-start">
           <Reveal delay={160}>
             <div
-              ref={videoContainerRef}
+              ref={(node) => {
+                // Combine refs
+                if (node) {
+                  videoContainerRef.current = node
+                  inViewRef.current = node
+                }
+              }}
               className="relative overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
             >
                 {active && (
@@ -272,7 +294,6 @@ const StudioOriginals = () => {
                       poster={active.poster}
                       controls
                       muted
-                      autoPlay
                       playsInline
                       preload="metadata"
                       ref={videoRef}
