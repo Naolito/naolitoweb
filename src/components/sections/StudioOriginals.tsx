@@ -193,16 +193,18 @@ const StudioOriginals = () => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [playlistHeight, setPlaylistHeight] = useState<number | undefined>(undefined)
 
-  // Create a mutable ref for intersection observer
+  // Create refs
   const containerRef = useRef<HTMLDivElement>(null)
   const { ref: inViewRef, isInView } = useInView({ threshold: 0.5, once: false })
 
-  // Combine refs effect
-  useEffect(() => {
-    if (containerRef.current && inViewRef.current !== containerRef.current) {
-      (inViewRef as React.MutableRefObject<HTMLDivElement | null>).current = containerRef.current
+  // Callback ref to sync both refs
+  const setRefs = (node: HTMLDivElement | null) => {
+    containerRef.current = node;
+    // Force update the inView ref
+    if (inViewRef && 'current' in inViewRef) {
+      (inViewRef as React.MutableRefObject<HTMLDivElement | null>).current = node
     }
-  }, [inViewRef])
+  }
 
   useEffect(() => {
     const updateHeight = () => {
@@ -219,10 +221,17 @@ const StudioOriginals = () => {
     const video = videoRef.current
     if (!video) return
 
+    console.log('[StudioOriginals] Play check:', { hasInteracted, isInView, activeId })
+
     // Only play if: (user interacted and changed video) OR (video is in viewport for first time)
     const shouldPlay = (hasInteracted || isInView)
 
-    if (!shouldPlay) return
+    if (!shouldPlay) {
+      console.log('[StudioOriginals] Should not play yet')
+      return
+    }
+
+    console.log('[StudioOriginals] Attempting to play video...')
 
     // Wait for video to be ready before playing
     const attemptPlay = () => {
@@ -245,12 +254,18 @@ const StudioOriginals = () => {
     attemptPlay()
   }, [activeId, hasInteracted, isInView])
 
+  // Debug isInView changes
+  useEffect(() => {
+    console.log('[StudioOriginals] isInView changed:', isInView)
+  }, [isInView])
+
   // Pause video when out of view
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
     if (!isInView && !video.paused) {
+      console.log('[StudioOriginals] Pausing video (out of view)')
       video.pause()
     }
   }, [isInView])
@@ -286,7 +301,7 @@ const StudioOriginals = () => {
         <div className="mt-6 grid lg:grid-cols-[1.35fr_0.65fr] gap-10 items-start">
           <Reveal delay={160}>
             <div
-              ref={containerRef}
+              ref={setRefs}
               className="relative overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
             >
                 {active && (
