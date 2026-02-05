@@ -334,7 +334,6 @@ const ClientLogos = () => {
                       key={active.id}
                       source={active.src}
                       poster={active.poster}
-                      controls
                       playsInline
                       preload="metadata"
                       ref={videoRef}
@@ -342,11 +341,6 @@ const ClientLogos = () => {
                     />
                   </div>
                 )}
-                <div className="absolute top-4 left-4">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/90 px-3 py-1.5 text-[11px] uppercase tracking-[0.35em] text-sky-600 backdrop-blur">
-                    Now Playing
-                  </span>
-                </div>
               </div>
             </Reveal>
 

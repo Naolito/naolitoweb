@@ -11,9 +11,17 @@ const buildJsonHeaders = () => {
   return headers
 }
 
+const getContentBaseUrl = () => {
+  const raw = import.meta.env.VITE_CONTENT_API_BASE
+  if (!raw) return ''
+  return raw.endsWith('/') ? raw.slice(0, -1) : raw
+}
+
 export const fetchContent = async <T>(key: string): Promise<T | null> => {
   try {
-    const response = await fetch(`/api/content/${key}`)
+    const baseUrl = getContentBaseUrl()
+    const url = baseUrl ? `${baseUrl}/api/content/${key}` : `/api/content/${key}`
+    const response = await fetch(url)
     if (!response.ok) {
       console.warn(`[fetchContent] ${key} returned ${response.status}`)
       return null
@@ -29,7 +37,9 @@ export const fetchContent = async <T>(key: string): Promise<T | null> => {
 
 export const saveContent = async (key: string, data: unknown): Promise<boolean> => {
   try {
-    const response = await fetch(`/api/content/${key}`, {
+    const baseUrl = getContentBaseUrl()
+    const url = baseUrl ? `${baseUrl}/api/content/${key}` : `/api/content/${key}`
+    const response = await fetch(url, {
       method: 'PUT',
       headers: buildJsonHeaders(),
       body: JSON.stringify({ data }),

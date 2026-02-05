@@ -8,6 +8,9 @@ const jsonResponse = (data: unknown, status = 200) =>
     status,
     headers: {
       'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,PUT,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
   })
 
@@ -33,6 +36,18 @@ export const onRequestGet: PagesFunction<Env> = async ({ params, env }) => {
   } catch (error) {
     return jsonResponse({ data: null, error: 'Invalid data format' }, 500)
   }
+}
+
+export const onRequestOptions: PagesFunction<Env> = async () => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,PUT,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
+    },
+  })
 }
 
 export const onRequestPut: PagesFunction<Env> = async ({ request, params, env }) => {
