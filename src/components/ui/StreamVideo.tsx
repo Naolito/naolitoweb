@@ -134,9 +134,7 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
       console.log('[StreamVideo DEBUG] Using native HLS (Safari/iOS) for non-Cloudflare video')
       video.src = resolvedSource
       video.load()
-      return () => {
-        video.removeEventListener('playing', enableUnmute)
-      }
+      return
     }
 
     if (Hls.isSupported()) {
