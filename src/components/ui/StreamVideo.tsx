@@ -184,15 +184,6 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
     video.load()
   }, [resolvedSource, isResolving])
 
-  // Mute via JavaScript (not HTML attribute) to keep volume controls enabled
-  useEffect(() => {
-    const video = innerRef.current
-    if (!video) return
-
-    // Set muted via property (keeps controls enabled) not via attribute
-    video.muted = true
-  }, [])
-
   return <video ref={innerRef} {...props} />
 })
 
