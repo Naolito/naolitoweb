@@ -11,10 +11,17 @@ type StreamVideoProps = Omit<React.VideoHTMLAttributes<HTMLVideoElement>, 'src'>
  */
 const getHighestQualityStreamUrl = async (manifestUrl: string): Promise<string | null> => {
   try {
+    console.log('[StreamVideo DEBUG] Fetching manifest from:', manifestUrl)
     const response = await fetch(manifestUrl)
-    if (!response.ok) return null
+
+    console.log('[StreamVideo DEBUG] Response status:', response.status, response.statusText)
+    if (!response.ok) {
+      console.error('[StreamVideo DEBUG] Failed to fetch manifest')
+      return null
+    }
 
     const manifestText = await response.text()
+    console.log('[StreamVideo DEBUG] Manifest content:\n', manifestText)
 
     // Parse HLS manifest to find all stream variants
     // Format: #EXT-X-STREAM-INF:RESOLUTION=1920x1080,...\npath/to/stream.m3u8
@@ -27,10 +34,16 @@ const getHighestQualityStreamUrl = async (manifestUrl: string): Promise<string |
       const height = parseInt(match[2], 10)
       const streamPath = match[3].trim()
 
+      console.log('[StreamVideo DEBUG] Found stream:', { width, height, path: streamPath })
       streams.push({ width, height, url: streamPath })
     }
 
-    if (streams.length === 0) return null
+    console.log('[StreamVideo DEBUG] Total streams found:', streams.length)
+
+    if (streams.length === 0) {
+      console.error('[StreamVideo DEBUG] No streams found in manifest')
+      return null
+    }
 
     // Sort by resolution (width × height) and get highest
     streams.sort((a, b) => (b.width * b.height) - (a.width * a.height))
@@ -42,11 +55,12 @@ const getHighestQualityStreamUrl = async (manifestUrl: string): Promise<string |
       ? highestQuality.url
       : `${baseUrl}/${highestQuality.url}`
 
-    console.log(`[StreamVideo] Found ${streams.length} quality levels, using highest: ${highestQuality.width}x${highestQuality.height}`)
+    console.log('[StreamVideo DEBUG] Selected highest quality:', highestQuality)
+    console.log('[StreamVideo DEBUG] Final URL:', fullUrl)
 
     return fullUrl
   } catch (error) {
-    console.warn('[StreamVideo] Failed to parse manifest:', error)
+    console.error('[StreamVideo DEBUG] Exception while parsing manifest:', error)
     return null
   }
 }
@@ -59,22 +73,26 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
 
   // Resolve highest quality stream for Cloudflare Stream
   useEffect(() => {
+    console.log('[StreamVideo DEBUG] Source changed:', source)
     const isCloudflareStream = source.includes('videodelivery.net') && source.includes('.m3u8')
+    console.log('[StreamVideo DEBUG] Is Cloudflare Stream:', isCloudflareStream)
 
     if (!isCloudflareStream) {
+      console.log('[StreamVideo DEBUG] Not Cloudflare Stream, using source as-is')
       setResolvedSource(source)
       return
     }
 
     let cancelled = false
 
+    console.log('[StreamVideo DEBUG] Attempting to resolve highest quality URL...')
     getHighestQualityStreamUrl(source).then((highQualityUrl) => {
       if (cancelled) return
       if (highQualityUrl) {
-        console.log('[StreamVideo] Using direct high-quality stream URL')
+        console.log('[StreamVideo DEBUG] ✅ Using direct high-quality stream URL:', highQualityUrl)
         setResolvedSource(highQualityUrl)
       } else {
-        console.log('[StreamVideo] Falling back to original manifest URL')
+        console.log('[StreamVideo DEBUG] ❌ Failed to resolve, falling back to original:', source)
         setResolvedSource(source)
       }
     })
@@ -88,7 +106,10 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
     const video = innerRef.current
     if (!video || !resolvedSource) return
 
+    console.log('[StreamVideo DEBUG] Setting up video with resolved source:', resolvedSource)
+
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      console.log('[StreamVideo DEBUG] Using native HLS (Safari/iOS)')
       video.src = resolvedSource
       video.load()
       return
@@ -100,12 +121,42 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
         backBufferLength: 0,
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
-        // Since we're using direct high-quality stream URL, no need to force levels
         capLevelToPlayerSize: false,
+        debug: true, // Enable HLS.js debug logs
       })
 
+      console.log('[HLS DEBUG] Loading source:', resolvedSource)
+
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
-        console.log(`[HLS] Manifest loaded, available levels:`, data.levels)
+        console.log('[HLS DEBUG] Manifest parsed, available levels:')
+        data.levels.forEach((level, index) => {
+          console.log(`  Level ${index}: ${level.width}x${level.height} @ ${level.bitrate} bps`)
+        })
+        console.log('[HLS DEBUG] Current level:', hls.currentLevel)
+        console.log('[HLS DEBUG] Load level:', hls.loadLevel)
+        console.log('[HLS DEBUG] Auto level enabled:', hls.autoLevelEnabled)
+      })
+
+      hls.on(Hls.Events.LEVEL_LOADING, (_event, data) => {
+        console.log('[HLS DEBUG] Loading level:', data.level)
+      })
+
+      hls.on(Hls.Events.LEVEL_LOADED, (_event, data) => {
+        const level = hls.levels[data.level]
+        console.log('[HLS DEBUG] Level loaded:', data.level, `${level?.width}x${level?.height}`)
+      })
+
+      hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+        const level = hls.levels[data.level]
+        console.log('[HLS DEBUG] ⚠️ SWITCHED TO LEVEL:', data.level, `${level?.width}x${level?.height}`)
+      })
+
+      hls.on(Hls.Events.FRAG_LOADING, (_event, data) => {
+        console.log('[HLS DEBUG] Loading fragment:', data.frag.sn, 'level:', data.frag.level)
+      })
+
+      hls.on(Hls.Events.FRAG_LOADED, (_event, data) => {
+        console.log('[HLS DEBUG] Fragment loaded:', data.frag.sn, 'level:', data.frag.level)
       })
 
       hls.loadSource(resolvedSource)
