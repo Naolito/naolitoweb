@@ -9,6 +9,10 @@ CLOUDFLARE_ACCOUNT_ID = ""
 CLOUDFLARE_API_TOKEN = ""
 CLOUDFLARE_STREAM_CUSTOMER_CODE = ""
 ADMIN_API_TOKEN = ""
+SOCIAL_STATS_CACHE_TTL = "300"
+TIKTOK_PROFILE_URL = "https://www.tiktok.com/@naolitok"
+INSTAGRAM_PROFILE_URL = "https://www.instagram.com/naolito/"
+FACEBOOK_PROFILE_URL = "https://www.facebook.com/naolito"
 
 [[d1_databases]]
 binding = "DB"

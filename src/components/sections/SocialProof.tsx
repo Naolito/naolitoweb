@@ -1,7 +1,61 @@
+import { useEffect, useState } from 'react'
 import { mockProjectImages } from '../../store/mockData'
 import Reveal from '../ui/Reveal'
 
+type SocialStatsResponse = {
+  tiktok: number | null
+  instagram: number | null
+  facebook: number | null
+  updatedAt: string
+}
+
+const formatFollowers = (value: number | null, loading: boolean) => {
+  if (loading) return '...'
+  if (value === null) return '—'
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace('.0', '')}M`
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1).replace('.0', '')}K`
+  return `${value}`
+}
+
 const SocialProof = () => {
+  const [stats, setStats] = useState<SocialStatsResponse>({
+    tiktok: null,
+    instagram: null,
+    facebook: null,
+    updatedAt: '',
+  })
+  const [loadingStats, setLoadingStats] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadStats = async () => {
+      try {
+        const response = await fetch('/api/social-stats')
+        if (!response.ok) {
+          if (isMounted) setLoadingStats(false)
+          return
+        }
+
+        const data = (await response.json()) as SocialStatsResponse
+        if (!isMounted) return
+        setStats(data)
+      } catch (error) {
+        if (!isMounted) return
+      } finally {
+        if (isMounted) setLoadingStats(false)
+      }
+    }
+
+    loadStats()
+    const interval = window.setInterval(loadStats, 60_000)
+
+    return () => {
+      isMounted = false
+      window.clearInterval(interval)
+    }
+  }, [])
+
   return (
     <section className="relative py-24 bg-[#f8fbff] overflow-hidden">
       <div
@@ -70,9 +124,9 @@ const SocialProof = () => {
                       <div className="text-slate-500 text-sm">@naolitok</div>
                     </div>
                   </div>
-                  <div className="text-right">
+                    <div className="text-right">
                     <div className="text-xl font-semibold text-slate-900 performance-metric-animate" style={{ animationDelay: '420ms' }}>
-                      —
+                      {formatFollowers(stats.tiktok, loadingStats)}
                     </div>
                     <div className="text-[11px] uppercase tracking-[0.3em] text-slate-500 performance-label-animate" style={{ animationDelay: '460ms' }}>
                       Followers
@@ -103,7 +157,7 @@ const SocialProof = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-semibold text-slate-900 performance-metric-animate" style={{ animationDelay: '560ms' }}>
-                      —
+                      {formatFollowers(stats.instagram, loadingStats)}
                     </div>
                     <div className="text-[11px] uppercase tracking-[0.3em] text-slate-500 performance-label-animate" style={{ animationDelay: '600ms' }}>
                       Followers
@@ -134,7 +188,7 @@ const SocialProof = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-semibold text-slate-900 performance-metric-animate" style={{ animationDelay: '700ms' }}>
-                      —
+                      {formatFollowers(stats.facebook, loadingStats)}
                     </div>
                     <div className="text-[11px] uppercase tracking-[0.3em] text-slate-500 performance-label-animate" style={{ animationDelay: '740ms' }}>
                       Followers
