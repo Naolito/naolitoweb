@@ -4,7 +4,6 @@ import { fetchContent } from '../../lib/contentApi'
 import { ClientLogo as AdminClientLogo, MediaItem, normalizeClientLogo, normalizeMediaItem } from '../../lib/contentSections'
 import Reveal from '../ui/Reveal'
 import StreamVideo from '../ui/StreamVideo'
-import useInView from '../ui/useInView'
 
 const makeWordmark = (label: string) =>
   `data:image/svg+xml,${encodeURIComponent(
@@ -182,20 +181,29 @@ const ClientLogos = () => {
   }, [])
 
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [playlistHeight, setPlaylistHeight] = useState<number | undefined>(undefined)
-
-  // Create refs
   const containerRef = useRef<HTMLDivElement>(null)
-  const { ref: inViewRef, isInView } = useInView({ threshold: 0.5, once: false })
+  const [playlistHeight, setPlaylistHeight] = useState<number | undefined>(undefined)
+  const [isInView, setIsInView] = useState(false)
 
-  // Callback ref to sync both refs
-  const setRefs = (node: HTMLDivElement | null) => {
-    containerRef.current = node;
-    // Force update the inView ref
-    if (inViewRef && 'current' in inViewRef) {
-      (inViewRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+  // Custom IntersectionObserver for viewport detection
+  useEffect(() => {
+    const element = containerRef.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        console.log('[ClientLogos] Intersection changed:', entry.isIntersecting)
+        setIsInView(entry.isIntersecting)
+      },
+      { threshold: 0.5 }
+    )
+
+    observer.observe(element)
+
+    return () => {
+      observer.disconnect()
     }
-  }
+  }, [])
 
   useEffect(() => {
     const updateHeight = () => {
@@ -317,7 +325,7 @@ const ClientLogos = () => {
           <div className="mt-6 grid lg:grid-cols-[1.35fr_0.65fr] gap-10 items-start">
             <Reveal delay={160}>
               <div
-                ref={setRefs}
+                ref={containerRef}
                 className="relative overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
               >
                 {active && (
