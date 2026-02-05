@@ -74,7 +74,10 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
   // Resolve highest quality stream for Cloudflare Stream
   useEffect(() => {
     console.log('[StreamVideo DEBUG] Source changed:', source)
-    const isCloudflareStream = source.includes('videodelivery.net') && source.includes('.m3u8')
+    const isCloudflareStream = (
+      (source.includes('videodelivery.net') || source.includes('cloudflarestream.com')) &&
+      source.includes('.m3u8')
+    )
     console.log('[StreamVideo DEBUG] Is Cloudflare Stream:', isCloudflareStream)
 
     if (!isCloudflareStream) {
@@ -107,9 +110,15 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
     if (!video || !resolvedSource) return
 
     console.log('[StreamVideo DEBUG] Setting up video with resolved source:', resolvedSource)
+    console.log('[StreamVideo DEBUG] Browser:', navigator.userAgent)
+    console.log('[StreamVideo DEBUG] canPlayType HLS:', video.canPlayType('application/vnd.apple.mpegurl'))
+    console.log('[StreamVideo DEBUG] HLS.isSupported:', Hls.isSupported())
 
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      console.log('[StreamVideo DEBUG] Using native HLS (Safari/iOS)')
+    // Force HLS.js for Cloudflare Stream to have full control over quality
+    const isCloudflareStream = resolvedSource.includes('cloudflarestream.com') || resolvedSource.includes('videodelivery.net')
+
+    if (video.canPlayType('application/vnd.apple.mpegurl') && !isCloudflareStream) {
+      console.log('[StreamVideo DEBUG] Using native HLS (Safari/iOS) for non-Cloudflare video')
       video.src = resolvedSource
       video.load()
       return
