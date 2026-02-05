@@ -120,6 +120,18 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
     console.log('[StreamVideo DEBUG] canPlayType HLS:', video.canPlayType('application/vnd.apple.mpegurl'))
     console.log('[StreamVideo DEBUG] HLS.isSupported:', Hls.isSupported())
 
+    // Start muted for autoplay, then enable unmute on first interaction
+    video.muted = true
+
+    const enableUnmute = () => {
+      console.log('[StreamVideo DEBUG] Video playing, enabling unmute capability')
+      // Don't unmute automatically, just ensure the control is enabled
+      video.removeAttribute('muted')
+      video.muted = true // Keep muted but allow user to unmute
+    }
+
+    video.addEventListener('playing', enableUnmute, { once: true })
+
     // Force HLS.js for Cloudflare Stream to have full control over quality
     const isCloudflareStream = resolvedSource.includes('cloudflarestream.com') || resolvedSource.includes('videodelivery.net')
 
@@ -127,7 +139,9 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
       console.log('[StreamVideo DEBUG] Using native HLS (Safari/iOS) for non-Cloudflare video')
       video.src = resolvedSource
       video.load()
-      return
+      return () => {
+        video.removeEventListener('playing', enableUnmute)
+      }
     }
 
     if (Hls.isSupported()) {
@@ -178,16 +192,20 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
       hls.attachMedia(video)
 
       return () => {
+        video.removeEventListener('playing', enableUnmute)
         hls.destroy()
       }
     }
 
     video.src = resolvedSource
     video.load()
+
+    return () => {
+      video.removeEventListener('playing', enableUnmute)
+    }
   }, [resolvedSource, isResolving])
 
-  // Explicitly ensure volume control is available
-  return <video ref={innerRef} controls={true} {...props} />
+  return <video ref={innerRef} {...props} />
 })
 
 StreamVideo.displayName = 'StreamVideo'
