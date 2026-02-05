@@ -181,7 +181,6 @@ const ClientLogos = () => {
     }
   }, [])
 
-  const videoContainerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [playlistHeight, setPlaylistHeight] = useState<number | undefined>(undefined)
 
