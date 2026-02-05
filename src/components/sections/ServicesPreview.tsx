@@ -29,8 +29,9 @@ const ServicesPreview = () => {
             </span>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-semibold leading-tight">
               Full-service animation
-              <span className="block text-transparent bg-gradient-to-r from-primary-600 via-accent-500 to-primary-500 bg-clip-text">
-                Next gen Pipeline
+              <span className="pipeline-scan-wrapper block">
+                <span className="pipeline-scan-text">Next gen Pipeline</span>
+                <span className="pipeline-scan-beam" />
               </span>
             </h2>
             <p className="mt-6 text-lg text-slate-600">

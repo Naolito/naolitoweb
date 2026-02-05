@@ -102,11 +102,17 @@ const SocialProof = () => {
                 <span className="block impact-line-animate" style={{ animationDelay: '220ms' }}>
                   Audience attention
                 </span>
-                <span
-                  className="block text-transparent bg-gradient-to-r from-primary-600 via-accent-500 to-primary-500 bg-clip-text impact-gradient-animate"
-                  style={{ animationDelay: '360ms' }}
-                >
-                  engineered
+                <span className="engineered-word block" style={{ animationDelay: '360ms' }}>
+                  {'engineered'.split('').map((letter, i) => (
+                    <span
+                      key={i}
+                      className="engineered-letter"
+                      style={{ '--letter-index': i } as React.CSSProperties}
+                    >
+                      {letter}
+                    </span>
+                  ))}
+                  <span className="engineered-shimmer" />
                 </span>
               </h2>
               <p className="mt-6 text-lg text-slate-600 max-w-xl impact-line-animate" style={{ animationDelay: '520ms' }}>
