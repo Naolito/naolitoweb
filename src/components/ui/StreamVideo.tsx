@@ -65,9 +65,10 @@ const getHighestQualityStreamUrl = async (manifestUrl: string): Promise<string |
   }
 }
 
-const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ...props }, ref) => {
+const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, autoPlay, ...props }, ref) => {
   const innerRef = useRef<HTMLVideoElement>(null)
   const [resolvedSource, setResolvedSource] = useState<string>(source)
+  const [isResolving, setIsResolving] = useState<boolean>(false)
 
   useImperativeHandle(ref, () => innerRef.current as HTMLVideoElement)
 
@@ -82,11 +83,13 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
 
     if (!isCloudflareStream) {
       console.log('[StreamVideo DEBUG] Not Cloudflare Stream, using source as-is')
+      setIsResolving(false)
       setResolvedSource(source)
       return
     }
 
     let cancelled = false
+    setIsResolving(true)
 
     console.log('[StreamVideo DEBUG] Attempting to resolve highest quality URL...')
     getHighestQualityStreamUrl(source).then((highQualityUrl) => {
@@ -98,6 +101,7 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
         console.log('[StreamVideo DEBUG] ❌ Failed to resolve, falling back to original:', source)
         setResolvedSource(source)
       }
+      setIsResolving(false)
     })
 
     return () => {
@@ -107,9 +111,10 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
 
   useEffect(() => {
     const video = innerRef.current
-    if (!video || !resolvedSource) return
+    if (!video || !resolvedSource || isResolving) return
 
     console.log('[StreamVideo DEBUG] Setting up video with resolved source:', resolvedSource)
+    console.log('[StreamVideo DEBUG] autoPlay:', autoPlay)
     console.log('[StreamVideo DEBUG] Browser:', navigator.userAgent)
     console.log('[StreamVideo DEBUG] canPlayType HLS:', video.canPlayType('application/vnd.apple.mpegurl'))
     console.log('[StreamVideo DEBUG] HLS.isSupported:', Hls.isSupported())
@@ -168,6 +173,19 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
         console.log('[HLS DEBUG] Fragment loaded:', data.frag.sn, 'level:', data.frag.level)
       })
 
+      // Handle autoplay when video is ready
+      if (autoPlay) {
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          console.log('[HLS DEBUG] Manifest parsed, attempting autoplay...')
+          // Wait a bit for buffer
+          setTimeout(() => {
+            video.play().catch((error) => {
+              console.warn('[HLS DEBUG] Autoplay failed:', error)
+            })
+          }, 100)
+        })
+      }
+
       hls.loadSource(resolvedSource)
       hls.attachMedia(video)
 
@@ -178,9 +196,20 @@ const StreamVideo = forwardRef<HTMLVideoElement, StreamVideoProps>(({ source, ..
 
     video.src = resolvedSource
     video.load()
-  }, [resolvedSource])
 
-  return <video ref={innerRef} {...props} />
+    // Handle autoplay for non-HLS.js playback
+    if (autoPlay) {
+      const handleCanPlay = () => {
+        console.log('[StreamVideo DEBUG] Video can play, attempting autoplay...')
+        video.play().catch((error) => {
+          console.warn('[StreamVideo DEBUG] Autoplay failed:', error)
+        })
+      }
+      video.addEventListener('canplay', handleCanPlay, { once: true })
+    }
+  }, [resolvedSource, isResolving, autoPlay])
+
+  return <video ref={innerRef} autoPlay={autoPlay} {...props} />
 })
 
 StreamVideo.displayName = 'StreamVideo'

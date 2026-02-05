@@ -272,6 +272,7 @@ const StudioOriginals = () => {
                       poster={active.poster}
                       controls
                       muted
+                      autoPlay
                       playsInline
                       preload="metadata"
                       ref={videoRef}
