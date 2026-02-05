@@ -17,6 +17,12 @@ import {
   normalizeMediaItem,
 } from '../lib/contentSections'
 
+type SocialStats = {
+  tiktok: number | null
+  instagram: number | null
+  facebook: number | null
+}
+
 const emptyMediaItem = (): MediaItem => normalizeMediaItem({})
 const emptyLogo = (): ClientLogo => normalizeClientLogo({})
 
@@ -89,6 +95,11 @@ const Admin = () => {
   const [originals, setOriginals] = useState<MediaItem[]>([])
   const [clientProjects, setClientProjects] = useState<MediaItem[]>([])
   const [clientLogos, setClientLogos] = useState<ClientLogo[]>([])
+  const [socialStats, setSocialStats] = useState<SocialStats>({
+    tiktok: null,
+    instagram: null,
+    facebook: null,
+  })
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState<Record<string, string>>({})
   const [uploading, setUploading] = useState<Record<string, boolean>>({})
@@ -101,10 +112,11 @@ const Admin = () => {
   useEffect(() => {
     let isMounted = true
     const load = async () => {
-      const [originalData, clientProjectData, clientLogoData] = await Promise.all([
+      const [originalData, clientProjectData, clientLogoData, socialData] = await Promise.all([
         fetchContent<MediaItem[]>('originals'),
         fetchContent<MediaItem[]>('client-projects'),
         fetchContent<ClientLogo[]>('client-logos'),
+        fetchContent<SocialStats>('social-stats'),
       ])
 
       if (!isMounted) return
@@ -118,6 +130,11 @@ const Admin = () => {
       setClientLogos(
         Array.isArray(clientLogoData) ? clientLogoData.map((item) => normalizeClientLogo(item)) : [],
       )
+      setSocialStats({
+        tiktok: typeof socialData?.tiktok === 'number' ? socialData.tiktok : null,
+        instagram: typeof socialData?.instagram === 'number' ? socialData.instagram : null,
+        facebook: typeof socialData?.facebook === 'number' ? socialData.facebook : null,
+      })
       setLoading(false)
     }
 
@@ -153,6 +170,14 @@ const Admin = () => {
       next[index] = { ...next[index], [field]: value }
       return next
     })
+  }
+
+  const handleSocialChange = (field: keyof SocialStats, value: string) => {
+    const numeric = value.trim() === '' ? null : Number(value)
+    setSocialStats((prev) => ({
+      ...prev,
+      [field]: Number.isFinite(numeric) ? numeric : null,
+    }))
   }
 
   const moveItem = <T,>(setter: Dispatch<SetStateAction<T[]>>, index: number, direction: 'up' | 'down') => {
@@ -756,6 +781,52 @@ const Admin = () => {
                 </button>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200/70 bg-white/80 p-6 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.4)]">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="text-xs uppercase tracking-[0.35em] text-slate-500">Social Stats</div>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Seguidores manuales</h2>
+            </div>
+            <button
+              onClick={() => handleSave('social-stats', socialStats)}
+              className="rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-600"
+            >
+              Guardar
+            </button>
+          </div>
+          {status['social-stats'] && <div className="mt-2 text-sm text-slate-500">{status['social-stats']}</div>}
+
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <label className="text-sm text-slate-600">
+              TikTok followers
+              <input
+                type="number"
+                value={socialStats.tiktok ?? ''}
+                onChange={(event) => handleSocialChange('tiktok', event.target.value)}
+                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
+              />
+            </label>
+            <label className="text-sm text-slate-600">
+              Instagram followers
+              <input
+                type="number"
+                value={socialStats.instagram ?? ''}
+                onChange={(event) => handleSocialChange('instagram', event.target.value)}
+                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
+              />
+            </label>
+            <label className="text-sm text-slate-600">
+              Facebook followers
+              <input
+                type="number"
+                value={socialStats.facebook ?? ''}
+                onChange={(event) => handleSocialChange('facebook', event.target.value)}
+                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-800"
+              />
+            </label>
           </div>
         </section>
       </div>

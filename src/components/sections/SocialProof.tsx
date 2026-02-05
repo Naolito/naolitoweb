@@ -9,6 +9,14 @@ type SocialStatsResponse = {
   updatedAt: string
 }
 
+type SocialStatsContent = {
+  data?: {
+    tiktok?: number | null
+    instagram?: number | null
+    facebook?: number | null
+  }
+}
+
 const formatFollowers = (value: number | null, loading: boolean) => {
   if (loading) return '...'
   if (value === null) return '—'
@@ -31,15 +39,28 @@ const SocialProof = () => {
 
     const loadStats = async () => {
       try {
-        const response = await fetch('/api/social-stats')
-        if (!response.ok) {
-          if (isMounted) setLoadingStats(false)
-          return
+        const manualResponse = await fetch('/api/content/social-stats')
+        if (manualResponse.ok) {
+          const manualPayload = (await manualResponse.json()) as SocialStatsContent
+          const manual = manualPayload?.data
+          if (manual && (typeof manual.tiktok === 'number' || typeof manual.instagram === 'number' || typeof manual.facebook === 'number')) {
+            if (!isMounted) return
+            setStats({
+              tiktok: typeof manual.tiktok === 'number' ? manual.tiktok : null,
+              instagram: typeof manual.instagram === 'number' ? manual.instagram : null,
+              facebook: typeof manual.facebook === 'number' ? manual.facebook : null,
+              updatedAt: new Date().toISOString(),
+            })
+            return
+          }
         }
 
-        const data = (await response.json()) as SocialStatsResponse
-        if (!isMounted) return
-        setStats(data)
+        const response = await fetch('/api/social-stats')
+        if (response.ok) {
+          const data = (await response.json()) as SocialStatsResponse
+          if (!isMounted) return
+          setStats(data)
+        }
       } catch (error) {
         if (!isMounted) return
       } finally {
