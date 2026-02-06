@@ -3,85 +3,63 @@ import Button from '../ui/Button'
 import Reveal from '../ui/Reveal'
 import heroBanner from '../../../media/hero-banner.png'
 
+const heroReelSource = 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4'
+
 const Hero = () => {
   return (
-    <section className="relative py-12 overflow-hidden bg-[#f8fbff]">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <div
-          className="absolute inset-0 opacity-80"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 12% 20%, rgba(56,189,248,0.3), transparent 45%), radial-gradient(circle at 85% 12%, rgba(251,113,133,0.22), transparent 42%), radial-gradient(circle at 45% 88%, rgba(253,224,71,0.2), transparent 45%)',
-          }}
-        />
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: 'linear-gradient(120deg, rgba(15,23,42,0.08) 1px, transparent 1px)',
-            backgroundSize: '120px 120px',
-          }}
-        />
-      </div>
-      <div className="absolute -top-48 right-[-10%] w-[520px] h-[520px] bg-sky-400/25 rounded-full blur-[180px] motion-safe:animate-float-slow" />
-      <div className="absolute -bottom-40 left-[-10%] w-[560px] h-[560px] bg-rose-300/30 rounded-full blur-[200px] motion-safe:animate-float-slower" />
-      <div className="absolute top-32 left-[12%] w-28 h-28 bg-amber-200/60 rounded-[40%] blur-2xl rotate-12" />
-      <div className="absolute top-20 right-[18%] hidden md:block w-12 h-12 text-sky-300/80 motion-safe:animate-wiggle">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2l1.7 4.7L18.4 8l-4.7 1.6L12 14.3l-1.7-4.7L5.6 8l4.7-1.3L12 2z" />
-        </svg>
-      </div>
-      <div className="absolute top-44 right-[10%] hidden md:block w-8 h-8 rounded-full bg-sky-200/80 shadow-[0_0_20px_rgba(56,189,248,0.35)] motion-safe:animate-float-fast" />
-      <div className="absolute bottom-24 left-[8%] hidden lg:block w-14 h-14 rounded-[30%] bg-rose-200/70 motion-safe:animate-float-fast" />
+    <section className="relative overflow-hidden bg-[#f8fbff]">
+      <Reveal>
+        <div className="relative w-full min-h-[560px] md:min-h-[700px] lg:min-h-[820px] overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            poster={heroBanner}
+            className="absolute inset-0 w-full h-full object-cover opacity-[0.42]"
+          >
+            <source src={heroReelSource} type="video/mp4" />
+          </video>
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(90deg, rgba(248,251,255,0.98) 0%, rgba(248,251,255,0.84) 26%, rgba(248,251,255,0.22) 54%, rgba(248,251,255,0.00) 100%)',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/14 via-transparent to-white/38" />
+          <div className="absolute -top-24 right-[-10%] w-[420px] h-[420px] bg-sky-300/25 rounded-full blur-[160px]" />
+          <div className="absolute -bottom-24 left-[-12%] w-[440px] h-[440px] bg-rose-300/20 rounded-full blur-[180px]" />
 
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-[0.8fr_1.2fr] gap-12 items-center">
-          {/* Left */}
-          <div>
-            <Reveal>
-              <h1 className="mt-6 text-balance text-5xl sm:text-6xl lg:text-7xl font-display font-semibold text-slate-900 leading-[0.95]">
-                Award winning
-                <span className="block bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
-                  animation studio
-                </span>
-              </h1>
-            </Reveal>
+          <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 h-full">
+            <div className="flex min-h-[560px] md:min-h-[700px] lg:min-h-[820px] items-center">
+              <div className="w-full max-w-3xl py-14 md:py-18 lg:py-24">
+                <h1 className="text-balance text-5xl sm:text-6xl lg:text-7xl font-display font-semibold text-slate-900 leading-[0.95]">
+                  Award winning
+                  <span className="block bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+                    animation studio
+                  </span>
+                </h1>
 
-            <Reveal delay={140}>
-              <p className="mt-6 text-lg md:text-xl text-slate-600 max-w-xl leading-relaxed">
-                Our films have been celebrated at international festivals, and we collaborate with clients all over
-                the world, from global brands to ambitious startups and creator-led teams. We bring big-studio craft
-                with a playful spirit, turning every brief into a story people feel, share, and remember.
-              </p>
-            </Reveal>
+                <p className="mt-6 text-lg md:text-xl text-slate-700 max-w-2xl leading-relaxed">
+                  Our films have been celebrated at international festivals, and we collaborate with clients all over
+                  the world, from global brands to ambitious startups and creator-led teams. We bring big-studio
+                  craft with a playful spirit, turning every brief into a story people feel, share, and remember.
+                </p>
 
-            <Reveal delay={260}>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Link to="/contact">
-                  <Button variant="primary" size="lg">
-                    Start a Project
-                  </Button>
-                </Link>
+                <div className="mt-8 flex flex-wrap gap-4">
+                  <Link to="/contact">
+                    <Button variant="primary" size="lg">
+                      Start a Project
+                    </Button>
+                  </Link>
+                </div>
               </div>
-            </Reveal>
-
-          </div>
-
-          {/* Right - Structured Reel */}
-          <Reveal delay={180}>
-            <div className="relative rounded-3xl overflow-hidden border border-black/10 bg-white aspect-[18/9] shadow-[0_25px_60px_rgba(15,23,42,0.12)]">
-              <img
-                src={heroBanner}
-                alt="Naolito originals on screen"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
             </div>
-          </Reveal>
+          </div>
         </div>
-      </div>
-
+      </Reveal>
     </section>
   )
 }

@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
-import ProjectCard from '../components/ui/ProjectCard'
-import Button from '../components/ui/Button'
+import FeaturedBento from '../components/sections/FeaturedBento'
+import ProjectMasonry from '../components/sections/ProjectMasonry'
+import Reveal from '../components/ui/Reveal'
 import { useStore } from '../store/store'
 import type { ProjectCategory } from '../types'
 
@@ -10,82 +11,106 @@ const Portfolio = () => {
   const projects = useStore((state) => state.projects)
   const [selectedCategory, setSelectedCategory] = useState<ProjectCategory | 'All'>('All')
 
-  const categories: Array<ProjectCategory | 'All'> = [
-    'All',
-    '2D Animation',
-    '3D Animation',
-    'Motion Graphics',
-    'Character Design',
-    'VFX',
-    'Explainer Videos',
-  ]
+  const categoryList = useMemo(() => {
+    const dynamicCategories = Array.from(new Set(projects.map((p) => p.category)))
+    return ['All', ...dynamicCategories] as Array<ProjectCategory | 'All'>
+  }, [projects])
 
-  const filteredProjects = selectedCategory === 'All'
-    ? projects
-    : projects.filter(project => project.category === selectedCategory)
+  const projectCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: projects.length }
+    for (const project of projects) {
+      counts[project.category] = (counts[project.category] || 0) + 1
+    }
+    return counts
+  }, [projects])
+
+  const filteredProjects = useMemo(
+    () =>
+      selectedCategory === 'All'
+        ? projects
+        : projects.filter((p) => p.category === selectedCategory),
+    [projects, selectedCategory],
+  )
+
+  const featuredProjects = useMemo(
+    () => projects.filter((p) => p.featured),
+    [projects],
+  )
+
+  const showFeatured = selectedCategory === 'All'
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#f8fbff]">
       <Header />
-      <main className="pt-20">
-        {/* Page Header */}
-          <section className="py-20 bg-gradient-to-b from-gray-900 to-gray-900/50 relative overflow-hidden">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-primary-500 to-purple-600 rounded-full blur-3xl" />
-            </div>
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white mb-4">
-                Our Work
-              </h1>
-              <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-                Character-driven animation for the world's most recognized brands
-              </p>
-            </div>
-          </section>
+      <main className="pt-24 md:pt-28">
+        {/* Intro text */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-10 md:pb-14">
+          <Reveal>
+            <h1 className="text-4xl font-display font-semibold leading-tight text-slate-900 md:text-5xl lg:text-6xl">
+              Our work
+            </h1>
+          </Reveal>
+          <Reveal delay={120}>
+            <p className="mt-6 text-base leading-relaxed text-slate-600 md:text-lg">
+              Every project starts with a story. From there we design characters, build worlds,
+              and craft motion that serves the narrative across any format or platform. Our
+              production pipeline covers 2D and 3D animation, character design, visual
+              development, editorial illustration, motion graphics, visual effects, and full
+              compositing, all handled by one team so the creative vision stays consistent from
+              first sketch to final delivery.
+            </p>
+          </Reveal>
+          <Reveal delay={240}>
+            <p className="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">
+              Beyond traditional production, we create interactive experiences including in-game
+              assets, playable ads, and mobile applications where animation meets performance
+              marketing. We also produce platform-native social content, short-form series, and
+              viral campaigns designed to convert attention into community.
+            </p>
+          </Reveal>
+          <Reveal delay={360}>
+            <p className="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">
+              One studio, one pipeline, built for speed without compromising craft. Browse our
+              selected work below and click any project to see the full story behind it.
+            </p>
+          </Reveal>
+        </div>
 
-        {/* Filters */}
-        <section className="py-8 bg-gray-900/50 sticky top-20 z-40 backdrop-blur-sm border-b border-gray-800">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? 'primary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category)}
+        {/* Filter pills */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+          <div className="flex flex-wrap gap-2">
+            {categoryList.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setSelectedCategory(category)}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                  selectedCategory === category
+                    ? 'bg-slate-900 text-white shadow-[0_4px_20px_rgba(15,23,42,0.15)]'
+                    : 'border border-black/10 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                {category}
+                <span
+                  className={`text-[10px] tabular-nums ${
+                    selectedCategory === category ? 'text-white/50' : 'text-slate-400'
+                  }`}
                 >
-                  {category}
-                </Button>
-              ))}
-            </div>
+                  {projectCounts[category] ?? 0}
+                </span>
+              </button>
+            ))}
           </div>
-        </section>
+        </div>
 
-        {/* Projects Grid */}
-        <section className="py-16">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            {filteredProjects.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredProjects.map((project) => (
-                  <div key={project.id} className="animate-fade-in">
-                    <ProjectCard project={project} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-20">
-                <p className="text-gray-400 text-lg">
-                  No projects found in this category.
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
+        {showFeatured && <FeaturedBento projects={featuredProjects} />}
+
+        <ProjectMasonry projects={filteredProjects} />
       </main>
+
       <Footer />
     </div>
   )
 }
 
 export default Portfolio
-

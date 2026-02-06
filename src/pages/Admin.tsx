@@ -56,13 +56,13 @@ const readVideoMetadata = (file: File): Promise<{ duration: string; ratio: Ratio
     }
     video.onerror = () => {
       URL.revokeObjectURL(url)
-      reject(new Error('No se pudo leer el metadata del video.'))
+      reject(new Error('Could not read video metadata.'))
     }
   })
 
 const VideoUploadStatus = ({ progress }: { progress: UploadProgressInfo | null }) => {
   if (!progress) {
-    return <span className="text-xs text-slate-500">Iniciando...</span>
+    return <span className="text-xs text-slate-500">Starting...</span>
   }
 
   const { percentage, speedMbps, etaSeconds, isSlowConnection } = progress
@@ -84,7 +84,7 @@ const VideoUploadStatus = ({ progress }: { progress: UploadProgressInfo | null }
       </div>
       {isSlowConnection && (
         <div className="text-[10px] text-amber-600">
-          Conexion lenta detectada
+          Slow connection detected
         </div>
       )}
     </div>
@@ -146,9 +146,9 @@ const Admin = () => {
   }, [])
 
   const handleSave = async (key: string, data: unknown) => {
-    setSectionStatus(key, 'Guardando...')
+    setSectionStatus(key, 'Saving...')
     const ok = await saveContent(key, data)
-    setSectionStatus(key, ok ? 'Guardado.' : 'No se pudo guardar. Reintenta.')
+    setSectionStatus(key, ok ? 'Saved.' : 'Could not save. Try again.')
   }
 
   const handleMediaChange = (
@@ -228,7 +228,7 @@ const Admin = () => {
         return next
       })
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo subir el video. Reintenta.'
+      const message = error instanceof Error ? error.message : 'Could not upload video. Try again.'
       setSectionStatus('upload', message)
     } finally {
       stopUploading(uploadKey)
@@ -247,11 +247,11 @@ const Admin = () => {
       const result = await uploadFileToUrl(upload.uploadURL, file)
       const url = resolveImageUrl(result)
       if (!url) {
-        throw new Error('No se pudo resolver la URL de la imagen.')
+        throw new Error('Could not resolve image URL.')
       }
       onSuccess(url)
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo subir la imagen. Reintenta.'
+      const message = error instanceof Error ? error.message : 'Could not upload image. Try again.'
       setSectionStatus('upload', message)
     } finally {
       stopUploading(uploadKey)
@@ -301,7 +301,7 @@ const Admin = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8fbff]">
-        <div className="text-slate-500">Cargando panel...</div>
+        <div className="text-slate-500">Loading admin panel...</div>
       </div>
     )
   }
@@ -318,9 +318,9 @@ const Admin = () => {
         />
         <div className="relative z-10 mx-auto max-w-6xl px-6 py-12">
           <div className="text-xs font-semibold uppercase tracking-[0.4em] text-sky-500">Naolito Admin</div>
-          <h1 className="mt-3 text-4xl font-display font-semibold text-slate-900">Panel de contenido</h1>
+          <h1 className="mt-3 text-4xl font-display font-semibold text-slate-900">Content panel</h1>
           <p className="mt-3 text-slate-600 max-w-2xl">
-            Sube videos e imágenes directamente a Cloudflare y actualiza el contenido de la web sin tocar código.
+            Upload videos and images directly to Cloudflare and update site content without touching code.
           </p>
           {status.upload && <div className="mt-3 text-sm text-rose-500">{status.upload}</div>}
         </div>
@@ -331,20 +331,20 @@ const Admin = () => {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="text-xs uppercase tracking-[0.35em] text-slate-500">Studio Originals</div>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Playlist principal</h2>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Main playlist</h2>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setOriginals((prev) => [...prev, emptyMediaItem()])}
                 className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                + Añadir
+                + Add
               </button>
               <button
                 onClick={() => handleSave('originals', originals)}
                 className="rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-600"
               >
-                Guardar
+                Save
               </button>
             </div>
           </div>
@@ -368,12 +368,12 @@ const Admin = () => {
                       {item.title || `Original ${index + 1}`}
                     </div>
                     <div className="text-[11px] uppercase tracking-[0.3em] text-slate-500 truncate">
-                      {item.tag || 'Sin tag'}
+                      {item.tag || 'No tag'}
                     </div>
                   </div>
                   <div className="hidden sm:flex items-center gap-3 text-xs text-slate-400">
-                    <span>{item.videoUrl ? 'Video listo' : 'Sin video'}</span>
-                    <span>{item.posterUrl ? 'Poster ok' : 'Sin poster'}</span>
+                    <span>{item.videoUrl ? 'Video ready' : 'No video'}</span>
+                    <span>{item.posterUrl ? 'Poster ready' : 'No poster'}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
@@ -384,7 +384,7 @@ const Admin = () => {
                       }}
                       disabled={index === 0}
                       className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                      title="Mover arriba"
+                      title="Move up"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -398,7 +398,7 @@ const Admin = () => {
                       }}
                       disabled={index === originals.length - 1}
                       className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                      title="Mover abajo"
+                      title="Move down"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -413,14 +413,14 @@ const Admin = () => {
                     }}
                     className="text-xs uppercase tracking-[0.2em] text-rose-500"
                   >
-                    Eliminar
+                    Delete
                   </button>
                 </summary>
 
                 <div className="border-t border-slate-100 px-4 pb-5 pt-4">
                   <div className="grid gap-3 md:grid-cols-2">
                     <label className="text-sm text-slate-600">
-                      Titulo
+                      Title
                       <input
                         value={item.title}
                         onChange={(event) => handleMediaChange(setOriginals, index, 'title', event.target.value)}
@@ -436,7 +436,7 @@ const Admin = () => {
                       />
                     </label>
                     <label className="text-sm text-slate-600 md:col-span-2">
-                      Descripcion
+                      Description
                       <textarea
                         value={item.description}
                         onChange={(event) => handleMediaChange(setOriginals, index, 'description', event.target.value)}
@@ -445,7 +445,7 @@ const Admin = () => {
                       />
                     </label>
                     <label className="text-sm text-slate-600">
-                      Likes (opcional)
+                      Likes (optional)
                       <input
                         type="number"
                         value={item.likes}
@@ -458,10 +458,10 @@ const Admin = () => {
                   <div className="mt-4 grid gap-4 md:grid-cols-2">
                     <div className="rounded-2xl border border-dashed border-slate-200 p-4">
                       <div className="text-sm font-semibold text-slate-700">Video</div>
-                      <div className="mt-2 text-xs text-slate-500 break-all">{item.videoUrl || 'Sin video'}</div>
+                      <div className="mt-2 text-xs text-slate-500 break-all">{item.videoUrl || 'No video'}</div>
                       <div className="mt-3 flex items-center gap-3">
                         <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white">
-                          Subir video
+                          Upload video
                           <input
                             type="file"
                             accept="video/*"
@@ -482,10 +482,10 @@ const Admin = () => {
 
                     <div className="rounded-2xl border border-dashed border-slate-200 p-4">
                       <div className="text-sm font-semibold text-slate-700">Poster</div>
-                      <div className="mt-2 text-xs text-slate-500 break-all">{item.posterUrl || 'Sin poster'}</div>
+                      <div className="mt-2 text-xs text-slate-500 break-all">{item.posterUrl || 'No poster'}</div>
                       <div className="mt-3 flex items-center gap-3">
                         <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
-                          Subir imagen
+                          Upload image
                           <input
                             type="file"
                             accept="image/*"
@@ -499,7 +499,7 @@ const Admin = () => {
                           />
                         </label>
                         {uploading[`${item.id}-poster`] && (
-                          <span className="text-xs text-slate-500">Subiendo...</span>
+                          <span className="text-xs text-slate-500">Uploading...</span>
                         )}
                       </div>
                     </div>
@@ -514,20 +514,20 @@ const Admin = () => {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="text-xs uppercase tracking-[0.35em] text-slate-500">Past Clients</div>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Proyectos con clientes</h2>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Client projects</h2>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setClientProjects((prev) => [...prev, emptyMediaItem()])}
                 className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                + Añadir
+                + Add
               </button>
               <button
                 onClick={() => handleSave('client-projects', clientProjects)}
                 className="rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-600"
               >
-                Guardar
+                Save
               </button>
             </div>
           </div>
@@ -548,15 +548,15 @@ const Admin = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold text-slate-900 truncate">
-                      {item.title || `Proyecto ${index + 1}`}
+                      {item.title || `Project ${index + 1}`}
                     </div>
                     <div className="text-[11px] uppercase tracking-[0.3em] text-slate-500 truncate">
-                      {item.tag || 'Sin tag'}
+                      {item.tag || 'No tag'}
                     </div>
                   </div>
                   <div className="hidden sm:flex items-center gap-3 text-xs text-slate-400">
-                    <span>{item.videoUrl ? 'Video listo' : 'Sin video'}</span>
-                    <span>{item.posterUrl ? 'Poster ok' : 'Sin poster'}</span>
+                    <span>{item.videoUrl ? 'Video ready' : 'No video'}</span>
+                    <span>{item.posterUrl ? 'Poster ready' : 'No poster'}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
@@ -567,7 +567,7 @@ const Admin = () => {
                       }}
                       disabled={index === 0}
                       className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                      title="Mover arriba"
+                      title="Move up"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -581,7 +581,7 @@ const Admin = () => {
                       }}
                       disabled={index === clientProjects.length - 1}
                       className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                      title="Mover abajo"
+                      title="Move down"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -596,14 +596,14 @@ const Admin = () => {
                     }}
                     className="text-xs uppercase tracking-[0.2em] text-rose-500"
                   >
-                    Eliminar
+                    Delete
                   </button>
                 </summary>
 
                 <div className="border-t border-slate-100 px-4 pb-5 pt-4">
                   <div className="grid gap-3 md:grid-cols-2">
                     <label className="text-sm text-slate-600">
-                      Titulo
+                      Title
                       <input
                         value={item.title}
                         onChange={(event) => handleMediaChange(setClientProjects, index, 'title', event.target.value)}
@@ -619,7 +619,7 @@ const Admin = () => {
                       />
                     </label>
                     <label className="text-sm text-slate-600 md:col-span-2">
-                      Descripcion
+                      Description
                       <textarea
                         value={item.description}
                         onChange={(event) => handleMediaChange(setClientProjects, index, 'description', event.target.value)}
@@ -628,7 +628,7 @@ const Admin = () => {
                       />
                     </label>
                     <label className="text-sm text-slate-600">
-                      Likes (opcional)
+                      Likes (optional)
                       <input
                         type="number"
                         value={item.likes}
@@ -641,10 +641,10 @@ const Admin = () => {
                   <div className="mt-4 grid gap-4 md:grid-cols-2">
                     <div className="rounded-2xl border border-dashed border-slate-200 p-4">
                       <div className="text-sm font-semibold text-slate-700">Video</div>
-                      <div className="mt-2 text-xs text-slate-500 break-all">{item.videoUrl || 'Sin video'}</div>
+                      <div className="mt-2 text-xs text-slate-500 break-all">{item.videoUrl || 'No video'}</div>
                       <div className="mt-3 flex items-center gap-3">
                         <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white">
-                          Subir video
+                          Upload video
                           <input
                             type="file"
                             accept="video/*"
@@ -665,10 +665,10 @@ const Admin = () => {
 
                     <div className="rounded-2xl border border-dashed border-slate-200 p-4">
                       <div className="text-sm font-semibold text-slate-700">Poster</div>
-                      <div className="mt-2 text-xs text-slate-500 break-all">{item.posterUrl || 'Sin poster'}</div>
+                      <div className="mt-2 text-xs text-slate-500 break-all">{item.posterUrl || 'No poster'}</div>
                       <div className="mt-3 flex items-center gap-3">
                         <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
-                          Subir imagen
+                          Upload image
                           <input
                             type="file"
                             accept="image/*"
@@ -682,7 +682,7 @@ const Admin = () => {
                           />
                         </label>
                         {uploading[`${item.id}-poster`] && (
-                          <span className="text-xs text-slate-500">Subiendo...</span>
+                          <span className="text-xs text-slate-500">Uploading...</span>
                         )}
                       </div>
                     </div>
@@ -697,20 +697,20 @@ const Admin = () => {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="text-xs uppercase tracking-[0.35em] text-slate-500">Client Logos</div>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Logos destacados</h2>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Featured logos</h2>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setClientLogos((prev) => [...prev, emptyLogo()])}
                 className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                + Añadir
+                + Add
               </button>
               <button
                 onClick={() => handleSave('client-logos', clientLogos)}
                 className="rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-600"
               >
-                Guardar
+                Save
               </button>
             </div>
           </div>
@@ -733,11 +733,11 @@ const Admin = () => {
                     value={item.name}
                     onChange={(event) => handleLogoChange(index, 'name', event.target.value)}
                     className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800"
-                    placeholder="Nombre del cliente"
+                    placeholder="Client name"
                   />
                 </div>
                 <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
-                  Subir logo
+                  Upload logo
                   <input
                     type="file"
                     accept="image/*"
@@ -750,13 +750,13 @@ const Admin = () => {
                     }}
                   />
                 </label>
-                {uploading[`${item.id}-logo`] && <span className="text-xs text-slate-500">Subiendo...</span>}
+                {uploading[`${item.id}-logo`] && <span className="text-xs text-slate-500">Uploading...</span>}
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => moveItem(setClientLogos, index, 'up')}
                     disabled={index === 0}
                     className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Mover arriba"
+                    title="Move up"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -766,7 +766,7 @@ const Admin = () => {
                     onClick={() => moveItem(setClientLogos, index, 'down')}
                     disabled={index === clientLogos.length - 1}
                     className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Mover abajo"
+                    title="Move down"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -777,7 +777,7 @@ const Admin = () => {
                   onClick={() => setClientLogos((prev) => prev.filter((entry) => entry.id !== item.id))}
                   className="text-xs uppercase tracking-[0.2em] text-rose-500"
                 >
-                  Eliminar
+                  Delete
                 </button>
               </div>
             ))}
@@ -788,13 +788,13 @@ const Admin = () => {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="text-xs uppercase tracking-[0.35em] text-slate-500">Social Stats</div>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Seguidores manuales</h2>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Manual followers</h2>
             </div>
             <button
               onClick={() => handleSave('social-stats', socialStats)}
               className="rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-600"
             >
-              Guardar
+              Save
             </button>
           </div>
           {status['social-stats'] && <div className="mt-2 text-sm text-slate-500">{status['social-stats']}</div>}

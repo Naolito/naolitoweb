@@ -7,14 +7,13 @@ const mockProjects: Project[] = [
   {
     id: '1',
     title: 'Netflix Holiday Campaign',
-    description: 'Character animation and visual development for Netflix\'s global holiday campaign featuring original characters and festive storytelling.',
+    description: 'Full character animation and visual development package for Netflix\'s global holiday campaign. We designed a family of original characters from scratch, developed their personalities and visual language, then produced a suite of animated spots for broadcast, social, and in-app placements across 24 territories. The project ran from initial concept through storyboarding, animation, look development, compositing, and multi-format delivery over a five-month production cycle.',
     category: 'Character Design',
     thumbnailUrl: mockProjectImages.character[0],
-    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    images: [
-      mockProjectImages.character[1],
-      mockProjectImages.character[2],
-    ],
+    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    images: Array.from({ length: 64 }, (_, i) =>
+      `https://picsum.photos/seed/netflix-${i}/800/600`
+    ),
     client: 'Netflix',
     year: 2024,
     featured: true,
@@ -22,13 +21,15 @@ const mockProjects: Project[] = [
   {
     id: '2',
     title: 'PlayStation 5 Launch Spot',
-    description: '3D character animation for PlayStation 5 console launch commercial showcasing next-gen gaming experiences.',
+    description: 'Cinematic 3D character animation for the PlayStation 5 console launch. We built stylized hero characters in full CG, rigged and animated them through high-energy action sequences, and delivered a sixty-second hero spot plus fifteen-second cutdowns for digital and broadcast. The pipeline included character modeling, environment design, lighting, FX simulations, and final compositing with a tight turnaround to hit the global launch window.',
     category: '3D Animation',
     thumbnailUrl: mockProjectImages.animation3d[0],
-    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
     images: [
       mockProjectImages.animation3d[1],
       mockProjectImages.animation3d[2],
+      mockProjectImages.character[0],
+      mockProjectImages.motion[2],
     ],
     client: 'PlayStation',
     year: 2023,
@@ -37,11 +38,14 @@ const mockProjects: Project[] = [
   {
     id: '3',
     title: 'Amazon Prime Series Titles',
-    description: 'Motion graphics and title sequence design for Amazon Prime Video original series with dynamic typography.',
+    description: 'Motion graphics and title sequence design for an Amazon Prime Video original series. We developed a dynamic typographic system that adapts across episodes while keeping a consistent visual identity. The work covered concept exploration, style frames, full animation of the opening titles, episode cards, and end credits, all delivered with editorial-grade timing synced to the composer\'s score.',
     category: 'Motion Graphics',
     thumbnailUrl: mockProjectImages.motion[0],
+    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
     images: [
       mockProjectImages.motion[1],
+      mockProjectImages.motion[2],
+      mockProjectImages.explainer[0],
     ],
     client: 'Amazon',
     year: 2024,
@@ -50,11 +54,15 @@ const mockProjects: Project[] = [
   {
     id: '4',
     title: 'Homework Animated Short',
-    description: 'Kickstarter-funded debut short film. 100+ festival selections worldwide, 20+ awards, and preselected for Spain\u2019s Goya Awards 2025.',
+    description: 'Our debut original short film, funded through Kickstarter and produced entirely in-house. Homework tells the story of a child\'s imagination colliding with everyday routine through full 3D animation with a handcrafted aesthetic. The production covered every stage: script, character design, storyboard, layout, animation, FX, look development, original score, sound design, and final compositing. The film screened at festivals worldwide and is now streaming on Disney+.',
     category: '3D Animation',
     thumbnailUrl: mockProjectImages.animation3d[1],
+    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
     images: [
       mockProjectImages.animation3d[2],
+      mockProjectImages.animation3d[0],
+      mockProjectImages.animation2d[1],
+      mockProjectImages.character[2],
     ],
     year: 2024,
     featured: true,
@@ -62,11 +70,14 @@ const mockProjects: Project[] = [
   {
     id: '5',
     title: 'Nestlé Product Campaign',
-    description: 'Character-driven commercial animation for Nestlé product line launch featuring engaging brand mascots.',
+    description: 'Character-driven commercial animation for Nestlé\'s product line launch. We created a cast of brand mascots from initial sketches through final rigged models, then animated a hero thirty-second TV spot and a series of six-second social cutdowns. The visual development phase included color scripts, environment concepts, and style exploration to lock a warm, approachable look that aligned with the brand\'s family-friendly positioning.',
     category: 'Character Design',
     thumbnailUrl: mockProjectImages.character[1],
+    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
     images: [
       mockProjectImages.character[2],
+      mockProjectImages.character[0],
+      mockProjectImages.explainer[1],
     ],
     client: 'Nestlé',
     year: 2024,
@@ -75,11 +86,14 @@ const mockProjects: Project[] = [
   {
     id: '6',
     title: 'Amazon Alexa Voice Assistant',
-    description: 'Explainer animation showcasing Alexa features with engaging character storytelling and modern design.',
+    description: 'Explainer animation series for Amazon Alexa, designed to showcase product features through character-led storytelling. We developed a friendly guide character and built a modular animation system that allowed rapid production of twelve episodes covering different Alexa capabilities. Each episode combined 2D character animation with motion graphics overlays and screen recordings, delivered in landscape and vertical formats for web, social, and in-app placement.',
     category: 'Explainer Videos',
     thumbnailUrl: mockProjectImages.explainer[0],
+    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     images: [
       mockProjectImages.explainer[1],
+      mockProjectImages.explainer[2],
+      mockProjectImages.motion[0],
     ],
     client: 'Amazon',
     year: 2023,
@@ -88,11 +102,14 @@ const mockProjects: Project[] = [
   {
     id: '7',
     title: 'Tech Startup Brand Video',
-    description: 'High-energy motion graphics showcase for a Silicon Valley tech startup featuring bold colors and modern aesthetics.',
+    description: 'High-energy motion graphics showcase for a Series B tech startup. The brief called for a two-minute brand film that could live on the homepage, play at investor events, and cut into social assets. We designed a bold graphic language with custom iconography, kinetic typography, and data visualizations, all animated to an upbeat soundtrack. The project included three rounds of style exploration, full storyboard, and delivery in 4K with subtitle variants for five markets.',
     category: 'Motion Graphics',
     thumbnailUrl: mockProjectImages.motion[2],
     images: [
       mockProjectImages.motion[0],
+      mockProjectImages.motion[1],
+      mockProjectImages.explainer[0],
+      mockProjectImages.animation2d[2],
     ],
     year: 2024,
     featured: false,
@@ -100,11 +117,13 @@ const mockProjects: Project[] = [
   {
     id: '8',
     title: 'Environmental Documentary',
-    description: '2D animated sequences for nature documentary series with beautiful hand-drawn illustrations.',
+    description: '2D animated sequences for a six-part nature documentary series. We produced hand-drawn illustrations and frame-by-frame animation to visualize ecological processes that cameras cannot capture: deep-ocean currents, root systems, and microscopic pollination cycles. Each episode featured two to three animated segments ranging from thirty seconds to two minutes, all rendered in a watercolor-inspired style that complemented the live-action photography.',
     category: '2D Animation',
     thumbnailUrl: mockProjectImages.animation2d[2],
     images: [
       mockProjectImages.animation2d[0],
+      mockProjectImages.animation2d[1],
+      mockProjectImages.character[1],
     ],
     year: 2023,
     featured: false,
@@ -238,11 +257,10 @@ const mockContactInfo: ContactInfo = {
   address: 'Sor Teresa Prat 15, Malaga 29003',
   socialLinks: {
     linkedin: 'https://linkedin.com/company/naolito-animation-studios?originalSubdomain=es',
-    twitter: '',
     instagram: 'https://instagram.com/naolito',
     tiktok: 'https://tiktok.com/@naolitok',
     facebook: 'https://facebook.com/naolito',
-    youtube: 'https://youtube.com/@naolito',
+    youtube: 'https://youtube.com/naolito',
     vimeo: 'https://vimeo.com/naolito',
   },
 }

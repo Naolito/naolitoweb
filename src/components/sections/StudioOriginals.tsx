@@ -143,17 +143,12 @@ const formatCount = (value: number) => {
 const StudioOriginals = () => {
   const [items, setItems] = useState<OriginalItem[]>(fallbackOriginals)
   const [activeId, setActiveId] = useState(fallbackOriginals[0]?.id ?? '')
-  const [hasInteracted, setHasInteracted] = useState(false)
-  const [likes, setLikes] = useState<Record<string, number>>(() => (
-    Object.fromEntries(fallbackOriginals.map((item) => [item.id, item.likes])) as Record<string, number>
-  ))
-  const [liked, setLiked] = useState<Record<string, boolean>>(() => (
-    Object.fromEntries(fallbackOriginals.map((item) => [item.id, false])) as Record<string, boolean>
-  ))
+  const [scrollFade, setScrollFade] = useState({ top: 0, bottom: 0 })
   const active = useMemo(
     () => items.find((item) => item.id === activeId) ?? items[0],
     [activeId, items],
   )
+  const playlistRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let isCancelled = false
@@ -179,8 +174,6 @@ const StudioOriginals = () => {
       })
 
       setItems(mapped)
-      setLikes(Object.fromEntries(mapped.map((item) => [item.id, item.likes])) as Record<string, number>)
-      setLiked(Object.fromEntries(mapped.map((item) => [item.id, false])) as Record<string, boolean>)
       setActiveId((prev) => (mapped.some((item) => item.id === prev) ? prev : mapped[0].id))
     })
 
@@ -190,66 +183,36 @@ const StudioOriginals = () => {
   }, [])
 
   const videoRef = useRef<HTMLVideoElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [playlistHeight, setPlaylistHeight] = useState<number | undefined>(undefined)
-  const [isInView, setIsInView] = useState(false)
 
-  // Custom IntersectionObserver for viewport detection
-  useEffect(() => {
-    const element = containerRef.current
-    if (!element) return
+  const updateScrollFade = () => {
+    const playlist = playlistRef.current
+    if (!playlist) return
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        console.log('[StudioOriginals] Intersection changed:', entry.isIntersecting)
-        setIsInView(entry.isIntersecting)
-      },
-      { threshold: 0.5 }
-    )
+    const { scrollTop, scrollHeight, clientHeight } = playlist
+    const maxScroll = Math.max(scrollHeight - clientHeight, 0)
 
-    observer.observe(element)
-
-    return () => {
-      observer.disconnect()
+    if (maxScroll <= 1) {
+      setScrollFade({ top: 0, bottom: 0 })
+      return
     }
-  }, [])
 
-  useEffect(() => {
-    const updateHeight = () => {
-      if (containerRef.current) {
-        setPlaylistHeight(containerRef.current.offsetHeight)
-      }
-    }
-    updateHeight()
-    window.addEventListener('resize', updateHeight)
-    return () => window.removeEventListener('resize', updateHeight)
-  }, [])
+    const edgeRange = 96
+    const nextTop = Math.min(scrollTop / edgeRange, 1)
+    const nextBottom = Math.min((maxScroll - scrollTop) / edgeRange, 1)
+
+    setScrollFade({ top: nextTop, bottom: nextBottom })
+  }
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-
-    console.log('[StudioOriginals] Play check:', { hasInteracted, isInView, activeId })
-
-    // Only play if: (user interacted and changed video) OR (video is in viewport for first time)
-    const shouldPlay = (hasInteracted || isInView)
-
-    if (!shouldPlay) {
-      console.log('[StudioOriginals] Should not play yet')
-      return
-    }
-
-    console.log('[StudioOriginals] Attempting to play video...')
-
-    // Wait for video to be ready before playing
     const attemptPlay = () => {
-      if (video.readyState >= 2) { // HAVE_CURRENT_DATA or better
+      if (video.readyState >= 2) {
         const playPromise = video.play()
         if (playPromise?.catch) {
           playPromise.catch(() => undefined)
         }
       } else {
-        // Video not ready yet, wait for it
         video.addEventListener('loadeddata', () => {
           const playPromise = video.play()
           if (playPromise?.catch) {
@@ -260,34 +223,16 @@ const StudioOriginals = () => {
     }
 
     attemptPlay()
-  }, [activeId, hasInteracted, isInView])
+  }, [activeId])
 
-  // Debug isInView changes
   useEffect(() => {
-    console.log('[StudioOriginals] isInView changed:', isInView)
-  }, [isInView])
-
-  // Pause video when out of view
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-
-    if (!isInView && !video.paused) {
-      console.log('[StudioOriginals] Pausing video (out of view)')
-      video.pause()
+    updateScrollFade()
+    const handleResize = () => updateScrollFade()
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
     }
-  }, [isInView])
-
-  const toggleLike = (id: string) => {
-    setLiked((prev) => {
-      const nextValue = !prev[id]
-      setLikes((current) => ({
-        ...current,
-        [id]: Math.max(0, current[id] + (nextValue ? 1 : -1)),
-      }))
-      return { ...prev, [id]: nextValue }
-    })
-  }
+  }, [items.length])
 
   return (
     <section className="relative py-24 bg-[#f8fbff] overflow-hidden">
@@ -306,118 +251,78 @@ const StudioOriginals = () => {
           </span>
         </Reveal>
 
-        <div className="mt-6 grid lg:grid-cols-[1.35fr_0.65fr] gap-10 items-start">
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.35fr_0.65fr] items-start">
           <Reveal delay={160}>
-            <div
-              ref={containerRef}
-              className="relative overflow-hidden rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
-            >
-                {active && (
-                  <div className="w-full aspect-video rounded-3xl overflow-hidden">
-                    <StreamVideo
-                      key={active.id}
-                      source={active.src}
-                      poster={active.poster}
-                      playsInline
-                      preload="metadata"
-                      ref={videoRef}
-                      className="w-full h-full object-cover rounded-3xl"
-                    />
-                  </div>
-                )}
+            <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-black shadow-[0_20px_60px_rgba(15,23,42,0.1)]">
+              {active && (
+                <div className="relative w-full aspect-video">
+                  <StreamVideo
+                    key={active.id}
+                    source={active.src}
+                    poster={active.poster}
+                    playsInline
+                    muted
+                    loop
+                    preload="metadata"
+                    ref={videoRef}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
             </div>
           </Reveal>
 
-          <Reveal delay={240} className="relative">
-            <div
-              className="overflow-y-auto pr-2"
-              style={{ maxHeight: playlistHeight ? `${playlistHeight}px` : undefined }}
-            >
-              {items.map((item, index) => (
-                <div
-                  key={item.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => {
-                    setHasInteracted(true)
-                    setActiveId(item.id)
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault()
-                      setHasInteracted(true)
-                      setActiveId(item.id)
-                    }
-                  }}
-                  className={`w-full text-left px-5 py-4 transition-all cursor-pointer playlist-item-animate ${
-                    index > 0 ? 'border-t border-black/10' : ''
-                  } ${
-                    item.id === activeId
-                      ? 'bg-sky-50'
-                      : 'hover:bg-sky-50/60'
-                  }`}
-                  style={{ animationDelay: `${180 + index * 140}ms` }}
-                >
-                  <div className="flex gap-4 items-center">
-                    <div className="relative w-20 h-14 rounded-xl overflow-hidden border border-black/10 bg-white">
+          <Reveal delay={240}>
+            <div className="text-[11px] uppercase tracking-[0.35em] text-slate-500">Playlist</div>
+            <div className="relative mt-4">
+              <div
+                ref={playlistRef}
+                onScroll={updateScrollFade}
+                className="max-h-[72vh] overflow-y-auto no-scrollbar space-y-3"
+              >
+                {items.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveId(item.id)}
+                    className={`group relative block w-full text-left overflow-hidden rounded-2xl border transition-all ${
+                      item.id === activeId
+                        ? 'border-sky-300 shadow-[0_8px_24px_rgba(14,165,233,0.2)]'
+                        : 'border-black/10 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="relative h-80 sm:h-[22rem] bg-slate-100">
                       <img
                         src={item.poster}
                         alt={item.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = `https://picsum.photos/seed/original-${item.id}/400/300`
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        onError={(event) => {
+                          event.currentTarget.src = `https://picsum.photos/seed/original-${item.id}/640/360`
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[11px] uppercase tracking-[0.3em] text-slate-500">
-                        {item.tag || 'Studio Original'}
-                      </div>
-                      <div className="text-lg font-semibold text-slate-900 truncate">
-                        {item.title}
-                      </div>
-                      <div className="text-sm text-slate-600 line-clamp-2">
-                        {item.description}
-                      </div>
-                      <div className="mt-2 text-[11px] uppercase tracking-[0.3em] text-slate-500">
-                        {formatCount(likes[item.id] ?? item.likes)} likes
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent opacity-100" />
+                      <div className="absolute inset-x-0 bottom-0 p-6 opacity-100">
+                        <div className="text-[0.95rem] sm:text-[1.05rem] uppercase tracking-[0.22em] text-white/75">
+                          {item.tag || 'Studio Original'}
+                        </div>
+                        <div className="mt-2 text-3xl sm:text-4xl font-semibold text-white truncate">{item.title}</div>
+                        <div className="mt-2 text-[0.95rem] sm:text-[1.05rem] uppercase tracking-[0.2em] text-white/75">
+                          {formatCount(item.likes)} likes
+                        </div>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        toggleLike(item.id)
-                      }}
-                      className={`shrink-0 w-10 h-10 rounded-full border flex items-center justify-center transition-all ${
-                        liked[item.id]
-                          ? 'border-sky-300 bg-sky-100 text-sky-600'
-                          : 'border-black/10 text-slate-500 hover:text-slate-900 hover:border-black/20 hover:bg-sky-50'
-                      }`}
-                      aria-pressed={liked[item.id]}
-                      aria-label={`Like ${item.title}`}
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        viewBox="0 0 24 24"
-                        fill={liked[item.id] ? 'currentColor' : 'none'}
-                        stroke="currentColor"
-                        strokeWidth={1.8}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                  </button>
+                ))}
+              </div>
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-[#f8fbff] to-transparent transition-opacity duration-200"
+                style={{ opacity: scrollFade.top }}
+              />
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#f8fbff] to-transparent transition-opacity duration-200"
+                style={{ opacity: scrollFade.bottom }}
+              />
             </div>
-            <div className="pointer-events-none absolute top-0 left-0 right-2 h-8 bg-gradient-to-b from-[#f8fbff] to-transparent" />
-            <div className="pointer-events-none absolute bottom-0 left-0 right-2 h-8 bg-gradient-to-t from-[#f8fbff] to-transparent" />
           </Reveal>
         </div>
       </div>

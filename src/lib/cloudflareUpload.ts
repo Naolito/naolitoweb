@@ -76,7 +76,7 @@ export const requestImageUpload = async (): Promise<ImageUploadResponse> => {
   })
 
   if (!response.ok) {
-    const message = await parseApiError(response, 'No se pudo iniciar la subida de imagen.')
+    const message = await parseApiError(response, 'Could not start image upload.')
     throw new Error(message)
   }
 
@@ -93,7 +93,7 @@ export const requestVideoUpload = async (
   })
 
   if (!response.ok) {
-    const message = await parseApiError(response, 'No se pudo iniciar la subida de video.')
+    const message = await parseApiError(response, 'Could not start video upload.')
     throw new Error(message)
   }
 
