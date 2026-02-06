@@ -3,7 +3,29 @@
     "allow": [
       "Bash(git commit:*)",
       "Bash(git push)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:naolito.com)",
+      "WebSearch",
+      "WebFetch(domain:naolito.studio)",
+      "WebFetch(domain:www.imdb.com)",
+      "WebFetch(domain:conference.blender.org)",
+      "WebFetch(domain:www.naolito.com)",
+      "WebFetch(domain:blog.displate.com)",
+      "WebFetch(domain:www.boredpanda.com)",
+      "WebFetch(domain:www.patreon.com)",
+      "WebFetch(domain:www.teepublic.com)",
+      "WebFetch(domain:www.sleepydays.es)",
+      "WebFetch(domain:pixel77.com)",
+      "WebFetch(domain:www.kickstarter.com)",
+      "WebFetch(domain:www.tebeosfera.com)",
+      "WebFetch(domain:www.goodreads.com)",
+      "WebFetch(domain:www.deviantart.com)",
+      "WebFetch(domain:www.pampling.com)",
+      "WebFetch(domain:www.othertees.com)",
+      "WebFetch(domain:www.neatoshop.com)",
+      "WebFetch(domain:www.designbyhumans.com)",
+      "WebFetch(domain:www.redbubble.com)",
+      "WebFetch(domain:naolito.wordpress.com)"
     ]
   }
 }

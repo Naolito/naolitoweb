@@ -51,6 +51,7 @@ export interface ContactInfo {
     linkedin?: string
     twitter?: string
     instagram?: string
+    tiktok?: string
     facebook?: string
     youtube?: string
     vimeo?: string
@@ -69,4 +70,3 @@ export interface StudioInfo {
     teamMembers: number
   }
 }
-

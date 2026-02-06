@@ -160,6 +160,32 @@ const Contact = () => {
                             </svg>
                           </a>
                         )}
+                        {contactInfo.socialLinks.tiktok && (
+                          <a
+                            href={contactInfo.socialLinks.tiktok}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-11 h-11 rounded-2xl border border-black/10 bg-white/90 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:border-slate-200 hover:-translate-y-0.5 transition-all"
+                            aria-label="TikTok"
+                          >
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" />
+                            </svg>
+                          </a>
+                        )}
+                        {contactInfo.socialLinks.facebook && (
+                          <a
+                            href={contactInfo.socialLinks.facebook}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-11 h-11 rounded-2xl border border-black/10 bg-white/90 flex items-center justify-center text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:-translate-y-0.5 transition-all"
+                            aria-label="Facebook"
+                          >
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M22.675 0h-21.35C.597 0 0 .597 0 1.326v21.348C0 23.403.597 24 1.326 24H12.82v-9.294H9.692V11.01h3.128V8.309c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.796.715-1.796 1.763v2.313h3.587l-.467 3.696h-3.12V24h6.116C23.403 24 24 23.403 24 22.674V1.326C24 .597 23.403 0 22.675 0z" />
+                            </svg>
+                          </a>
+                        )}
                         {contactInfo.socialLinks.youtube && (
                           <a
                             href={contactInfo.socialLinks.youtube}

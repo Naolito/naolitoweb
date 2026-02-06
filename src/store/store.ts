@@ -49,15 +49,14 @@ const mockProjects: Project[] = [
   },
   {
     id: '4',
-    title: 'Disney+ Character Development',
-    description: 'Character design and animation development for Disney+ exclusive animated content with magical storytelling.',
-    category: '2D Animation',
-    thumbnailUrl: mockProjectImages.animation2d[0],
+    title: 'Homework Animated Short',
+    description: 'Kickstarter-funded debut short film. 100+ festival selections worldwide, 20+ awards, and preselected for Spain\u2019s Goya Awards 2025.',
+    category: '3D Animation',
+    thumbnailUrl: mockProjectImages.animation3d[1],
     images: [
-      mockProjectImages.animation2d[1],
+      mockProjectImages.animation3d[2],
     ],
-    client: 'Disney',
-    year: 2023,
+    year: 2024,
     featured: true,
   },
   {
@@ -234,13 +233,15 @@ const mockServices: Service[] = [
 ]
 
 const mockContactInfo: ContactInfo = {
-  email: 'hello@naolito.studio',
-  phone: '+1 (555) 626-5486',
-  address: '123 Creative District, Los Angeles, CA 90028',
+  email: 'contact@naolito.com',
+  phone: '+34 601259578',
+  address: 'Sor Teresa Prat 15, Malaga 29003',
   socialLinks: {
-    linkedin: 'https://linkedin.com/company/naolito',
-    twitter: 'https://twitter.com/naolitostudio',
-    instagram: 'https://instagram.com/naolitostudio',
+    linkedin: 'https://linkedin.com/company/naolito-animation-studios?originalSubdomain=es',
+    twitter: '',
+    instagram: 'https://instagram.com/naolito',
+    tiktok: 'https://tiktok.com/@naolitok',
+    facebook: 'https://facebook.com/naolito',
     youtube: 'https://youtube.com/@naolito',
     vimeo: 'https://vimeo.com/naolito',
   },
@@ -248,13 +249,13 @@ const mockContactInfo: ContactInfo = {
 
 const mockStudioInfo: StudioInfo = {
   name: 'Naolito',
-  tagline: 'Crafting Compelling Animated Stories',
-  description: 'A boutique animation studio creating character-driven content for leading global brands. We combine creative excellence with technical expertise to deliver animation that engages and inspires.',
-  heroVideoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  tagline: 'The Cute Side of Life',
+  description: 'From pop-culture illustrations to award-winning animation. Naolito is the creative studio of Nacho Diaz Arjona, based in M\u00E1laga, Spain. We create character-driven content for global brands and develop original IPs, powered by Blender and a love for storytelling.',
+  heroVideoUrl: 'https://www.youtube.com/watch?v=fYEhOIsUYjA',
   stats: {
     projectsCompleted: 50,
     happyClients: 15,
-    yearsExperience: 8,
+    yearsExperience: 16,
     teamMembers: 20,
   },
 }
